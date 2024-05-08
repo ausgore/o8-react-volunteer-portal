@@ -45,7 +45,7 @@ export default function SecondProfile() {
                 ],
                 where: [["email_primary.email", "=", email]]
             });
-            
+
             const contact = response.data[0];
             // Normal fields
             setId(contact["id"]);
@@ -58,26 +58,27 @@ export default function SecondProfile() {
             // Getting value types of custom field names
             response = await CRM("CustomField", "get", {
                 select: ["name", "label", "html_type", "option_group_id"],
-                where: [
-                    ["custom_group_id:name", "=", customFieldSet],
-                    ["option_group_id", "IS NOT NULL"]
-                ]
+                where: [["custom_group_id:name", "=", customFieldSet]]
             });
-            const customField: Map<string, CustomFieldProps> = new Map(response.data.map((field: any) => (
-                [`${customFieldSet}.${field.name}`, { 
+            // Getting the option group IDs to fetch field vlaues
+            const optionGroupIds = response.data.map((field: any) => field.option_group_id).filter((id: any) => id);
+            // Get all option values that has its group_id in optionGroupIds
+            const optionValueResponse = await CRM("OptionValue", "get", {
+                select: ["label", "value", "name", "option_group_id"],
+                where: [["option_group_id", "IN", optionGroupIds]]
+            });
+            // Custom fields to be set in state
+            const customFields: Map<string, CustomFieldProps> = new Map(response.data.map((field: any) => (
+                [`${customFieldSet}.${field.name}`, {
                     label: field.label,
                     name: field.name,
                     htmlType: field.html_type,
                     value: contact[`${customFieldSet}.${field.name}`],
-                    optionGroupId: field.option_group_id
+                    optionGroupId: field.option_group_id,
+                    options: optionValueResponse.data.filter((opt: any) => opt.option_group_id == field.option_group_id)
                 }]
             ) as [string, CustomFieldProps]));
-            // Getting the option group IDs to fetch field vlaues
-            const optionGroupIds = response.data.map((field: any) => field.option_group_id);
-            // Get all option values that has its group_id in optionGroupIds
-            response = await CRM("OptionValue", "get", {
-
-            });
+            console.log(customFields);
 
             setIsLoading(false);
         })();
@@ -128,9 +129,9 @@ export default function SecondProfile() {
                     <label htmlFor="others">Others</label>
                 </div>
                 {/* Custom values */}
-               
+
                 <button style={{ marginTop: 12, paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2 }} onClick={updateProfile}>
-                    {isUpdating ? "Updating..." : "Update" }
+                    {isUpdating ? "Updating..." : "Update"}
                 </button>
             </div>
         </>}

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-type ComparisonOperator = "=" | "<=" | ">=" | ">" | "<" | "LIKE" | "!=" | "IS NOT EMPTY" | "IS EMPTY" | "IS NOT NULL" | "IS NULL";
+type ComparisonOperator = "=" | "<=" | ">=" | ">" | "<" | "LIKE" | "!=" | "IN" | "IS NOT EMPTY" | "IS EMPTY" | "IS NOT NULL" | "IS NULL";
 interface ParamProps {
     select?: string[];
     limit?: number;
