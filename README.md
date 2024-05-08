@@ -1,9 +1,9 @@
 # A couple of things to note
-1. Make sure to extract all of this into an empty folder under "wordpress" in your CiviCRM Wordpress folder.
+1. Make sure to extract all of this into an empty folder in the **wordpress** directory in your CiviCRM Wordpress project.
 Note that the name of the folder will be how you access your page each time you compile.
-Example, xampp/htdocs/wordpress/portal/index.html would be http://localhost/wordpress/portal
+Example, **xampp/htdocs/wordpress/portal/index.html** would be **http://localhost/wordpress/portal**
 
-2. Be sure to run "npm run build" for production to be displayed in http://localhost/wordpress/custom_name_here.
+2. Be sure to run **npm run build** to compile and display in **http://localhost/wordpress/custom_folder**. You will know you have done it correctly if a newly generated **index.html** is in your root directory under **wordpress/custom_folder**
 You could technically "npm run dev", but it will be in a seperate http://localhost:5173 which would not work in Wordpress.
 
 3. You could use wp_login_example.php to test Wordpress login for dynamic email data fetching rather than hardcoding. But you will have to delete index.html everytime you build, and replace the index script in line 21 to be the latest compiled file under the assets folder.
