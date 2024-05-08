@@ -1,5 +1,5 @@
 # A couple of things to note
-1. Make sure to extract all of this into an empty folder under "wordpress" in your Wordpress/CiviCRM folder.
+1. Make sure to extract all of this into an empty folder under "wordpress" in your CiviCRM Wordpress folder.
 Note that the name of the folder will be how you access your page each time you compile.
 Example, xampp/htdocs/wordpress/portal/index.html would be http://localhost/wordpress/portal
 
