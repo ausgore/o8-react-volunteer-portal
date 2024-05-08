@@ -16,4 +16,4 @@ CRM("Contact", "get", {
   where: [["id", "=", 1]]
 });
 ```
-Refer to your CiviCRM's **Support/Developer/Api4** for more documentaion. Syntax should be very similar to Javascript examples.
+Refer to your CiviCRM's **Support/Developer/Api4** for more documentation. Syntax should be very similar to Javascript examples.
