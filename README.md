@@ -20,7 +20,7 @@ CRM("Contact", "get", {
 // To update contact where id = 1, changing property foo to value "bar"
 CRM("Contact", "update", {
   where: [["id", "=", 1]],
-  values: [["name", "bar"]]
+  values: [["foo", "bar"]]
 });
 ```
 Refer to your CiviCRM's **Support/Developer/Api4** for more documentation. Syntax should be very similar to Javascript examples.
