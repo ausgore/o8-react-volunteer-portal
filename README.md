@@ -8,7 +8,7 @@ You could **npm run dev**, but it will be in a seperate http://localhost:5173 wh
 
 3. You could use wp_login_example.php to test Wordpress login for dynamic email data fetching rather than hardcoding, but you will have to delete index.html everytime you build, and replace the index script in line 21 to be the latest compiled file under the assets folder.
 
-4. Use the CRM function under **frontend/src/crm.ts** rather than trying to fetch directly from **api/crm.php** or **api/proxy.php**.
+4. Use the CRM function under **frontend/src/crm.ts** rather than trying to fetch directly from **api/traditional_api_call.php**.
 An example on how you would use the CRM function:
 ```js
 // To get contact where id = 1
