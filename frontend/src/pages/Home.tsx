@@ -7,7 +7,7 @@ export default function Home() {
     const [volunteeredActivities, setVolunteeredActivities] = useState([]);
     useEffect(() => {
         const win = window as any;
-        const email = win.email ?? "mjlee2605@gmail.com"; 
+        const email = win.email ?? "mjlee2605@gmail.com";
 
         (async function () {
             const response = await CRM("ActivityContact", "get", {
@@ -22,12 +22,6 @@ export default function Home() {
                 ],
                 where: [["contact_id.email_primary.email", "=", email]],
                 order: [["id", "ASC"]],
-                /**
-                 * for ($order as $o) {
-                 * $array = array()
-                 * $push_to_array($array, $o[0] => $o[1])
-                 * }
-                 */
                 limit: 7,
             });
             setVolunteeredActivities(response.data);

@@ -24,18 +24,21 @@ $params = array(
 
 // Conditional checking
 $params['limit'] = $query['limit'] ?? null;
-if (is_array($select) && !empty($select)) $params['select'] = $select;
-if (is_array($where) && !empty($where)) $params['where'] = $where;
+if (is_array($select) && !empty($select))
+    $params['select'] = $select;
+if (is_array($where) && !empty($where))
+    $params['where'] = $where;
 if (is_array($order) && !empty($order)) {
     $orderBy = array();
     // $order = [[id, ASC], [createdAt, ASC]]
-    foreach($order as $o) {
+    foreach ($order as $o) {
         $orderBy[$o[0]] = $o[1];
     }
     $params['orderBy'] = $orderBy;
 }
 
-if (is_array($values) && !empty($values)) $params['values'] = $values;
+if (is_array($values) && !empty($values))
+    $params['values'] = $values;
 
 $activityContacts = civicrm_api4($entity, $action, $params);
 
