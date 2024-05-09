@@ -36,10 +36,13 @@ if (is_array($order) && !empty($order)) {
     }
     $params['orderBy'] = $orderBy;
 }
-
-if (is_array($values) && !empty($values))
-    $params['values'] = $values;
-
+if (is_array($values) && !empty($values)) {
+    $valuesArray = array();
+    foreach ($values as $v) {
+        $valuesArray[$v[0]] = $v[1];
+    }
+    $params['values'] = $valuesArray;
+}
 $activityContacts = civicrm_api4($entity, $action, $params);
 
 echo json_encode($activityContacts);
