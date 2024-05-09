@@ -10,8 +10,8 @@ if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
 }
 
 // Specific params variables
-$entity = $query["entity"];
-$action = $query["action"];
+$entity = $query['entity'];
+$action = $query['action'];
 $select = $query['select'] ?? array();
 $where = $query['where'] ?? array();
 $order = $query['order'] ?? array();
@@ -43,6 +43,6 @@ if (is_array($values) && !empty($values)) {
     }
     $params['values'] = $valuesArray;
 }
-$activityContacts = civicrm_api4($entity, $action, $params);
 
-echo json_encode($activityContacts);
+$result = civicrm_api4($entity, $action, $params);
+echo json_encode($result);
