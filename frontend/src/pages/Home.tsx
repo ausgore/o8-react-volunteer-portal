@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CRM from "../../crm";
+import axios from "axios";
 
 export default function Home() {
     const [volunteeredActivities, setVolunteeredActivities] = useState([]);
     useEffect(() => {
         const win = window as any;
-        const email = win.email ?? "casuarina@octopus8.com";
+        const email = win.email ?? "mjlee2605@gmail.com";
 
         (async function () {
             const response = await CRM("ActivityContact", "get", {
@@ -20,8 +21,8 @@ export default function Home() {
                     "contact_id.email_primary.email"
                 ],
                 where: [["contact_id.email_primary.email", "=", email]],
-                order: [["activity_id.activity_date_time", "DESC"]],
-                limit: 7
+                order: [["id", "ASC"]],
+                limit: 7,
             });
             setVolunteeredActivities(response.data);
             console.log(response.data);
