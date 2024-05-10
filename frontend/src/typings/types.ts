@@ -1,0 +1,18 @@
+export interface CustomFIeld {
+    name: string;
+    label: string;
+    htmlType: string;
+    dataType: string;
+    value: any;
+    optionGroupId?: number;
+    options?: {
+        name: string;
+        label: string;
+        value: string;
+    }[]
+}
+
+export interface CustomFieldInputProps {
+    customField: CustomFIeld;
+    updateCustomField: (customFieldName: string, value: any) => void;
+}
