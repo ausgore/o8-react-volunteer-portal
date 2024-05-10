@@ -1,0 +1,462 @@
+/* Root variables are good for theme management */
+:root {
+    --sidebar-bg: #2C3E50;
+    --sidebar-text: #ECF0F1;
+    --sidebar-active-bg: #34495E;
+    --card-bg: #ffffff;
+    --icon-color: #7f8c8d;
+    --primary-text: #2C3E50;
+    --profile-bg: #3498DB;
+}
+
+/* Universal base styles */
+.profile-sidebar {
+    background-color: white;
+    color: var(--sidebar-text);
+    transition: width 0.3s ease-in-out;
+    width: 17%;
+}
+
+.logo-container {
+    scale: 0.7;
+    margin-top: 15%;
+    margin-right: 45%;
+    transition: margin-right 0.3s ease-in-out;
+}
+
+.profile-page {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    transition: flex-direction 0.3s ease-in-out;
+}
+
+/*///////////////////////////////////////////////////////////////////////////////////////////////*/
+/*////////////////////////////////////////////SIDEBAR NAVS///////////////////////////////////////////////////*/
+.sidebar-nav .sidebar-item {
+    display: flex;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar-nav {
+    margin-top: 20%;
+}
+
+.sidebar-item {
+    width: 80%;
+    height: 40%;
+    font-size: 180%;
+    margin-left: 10%;
+    text-decoration: none;
+    color: #3557B9;
+    font-weight: 600;
+    padding-top: 3%;
+
+}
+
+.NavContainers,
+.NavContainersLast {
+    height: 4.5rem;
+    margin-bottom: 5%;
+}
+
+.NavContainersLast {
+    height: 4.5rem;
+    margin-top: 155%;
+}
+
+.DashboardIcon {
+    margin-top: 1.9%;
+}
+
+.ProfileIcon {
+    margin-top: 2.1%;
+}
+
+.EventStatusIcon {
+    margin-top: 2.1%;
+}
+
+.EventIcon {
+    margin-top: 2%;
+}
+
+.SignOutIcon {
+    margin-top: 2%;
+}
+
+.sidebar-nav .NavContainers:hover,
+.NavContainersLast:hover,
+.sidebar-nav .sidebar-item.active {
+    background-color: rgba(169, 183, 224, 0.57);
+    border-left: 7px solid #A9B7E0;
+}
+
+.sidebar-item svg {
+    margin-right: 5%;
+}
+
+/*////////////////////////////////////////////END///////////////////////////////////////////////////*/
+/*////////////////////////////////////////////RIGHT SIDE TOP PART///////////////////////////////////////////////////*/
+
+.profile-content {
+    flex-grow: 1;
+    padding: 0rem;
+    background: #F4F5FB;
+    border-radius: 10px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    height: 23%;
+    background-color: #E3E8F9;
+}
+
+.profile-header h1 {
+    color: #6F6F6F;
+    font-size: 250%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+    margin-left: 4%;
+    margin-bottom: 6%;
+}
+
+
+.profile-image-container {
+    margin-right: 1rem;
+}
+
+.profile-image-container {
+    position: absolute;
+    z-index: 2;
+    top: 13%;
+    left: 23%;
+    /* Start position for larger screens */
+    transition: left 0.3s ease;
+}
+
+h1.profile-name {
+    position: absolute;
+    z-index: 2;
+    top: 16%;
+    left: 33%;
+    /* Start position for larger screens */
+    font-size: 3.3rem;
+    transition: left 0.3s ease, font-size 0.3s ease;
+}
+
+.profile-address {
+    position: absolute;
+    z-index: 2;
+    top: 24%;
+    left: 33%;
+    /* Start position for larger screens */
+    font-size: 1.8rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    transition: left 0.3s ease, font-size 0.3s ease;
+}
+
+.profile-image {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 5px solid white;
+    background-color: #ccc;
+    /* Placeholder color, replace with image */
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+
+.profile-name {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.profile-address {
+    color: #666;
+}
+
+/*////////////////////////////////////////////END///////////////////////////////////////////////////*/
+
+
+.profile-body {
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 2%;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    /* Ensure elements are side by side */
+    margin-bottom: 1rem;
+}
+
+.profile-form-group {
+    flex: 1;
+    /* Ensure form groups take equal space */
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-bottom: 1%;
+}
+
+.profile-form-control {
+    position: relative;
+    border-width: 0px;
+}
+
+.profile-form-group label {
+    font-size: 1.8rem;
+}
+
+.profile-form-control input {
+    padding: 1.5rem;
+    background-color: white;
+    color: #989898;
+    /* Default text color */
+    border-radius: 5px;
+    border-width: 0px;
+    width: 100%;
+    /* Adjust input width to fill container */
+}
+
+.profile-form-control input:focus {
+    color: #000;
+    /* Text color when input is focused */
+}
+
+
+.reset-password-button {
+    margin-left: 70%;
+    margin-top: 1%;
+    background-color: #A9B7E0;
+    /* Adjusted to a more suitable shade if necessary */
+    color: white;
+    /* Ensures text is white */
+    border: none;
+    /* No border for a cleaner look */
+    border-radius: 10px;
+    /* More pronounced rounded corners */
+    cursor: pointer;
+    /* Cursor indicates clickable */
+    padding: 8px 15px;
+    /* Increased padding for better spacing */
+    font-size: 150%;
+    /* Larger font size for readability */
+    display: flex;
+    /* Use flexbox to align icon and text */
+    align-items: center;
+    /* Center items vertically */
+    justify-content: center;
+    /* Center items horizontally */
+    transition: background-color 0.3s;
+    /* Smooth transition for hover effect */
+}
+
+.reset-password-button:hover {
+    background-color: #9ca8d8;
+    /* Slightly darker on hover for feedback */
+}
+
+.reset-password-icon {
+    margin-right: 10px;
+    /* Space between the icon and text */
+    font-size: 20px;
+    /* Adjust icon size */
+}
+
+
+
+
+.edit-icon {
+    position: absolute;
+    left: 90.5%;
+    /* Adjust icon position */
+    top: 30%;
+    font-size: 1.6rem;
+    color: #7186C2;
+    cursor: pointer;
+    /* Cursor indicates clickable */
+}
+
+.info-icon {
+    position: absolute;
+    left: 90%;
+    /* Adjust icon position */
+    top: -55%;
+    font-size: 1.9rem;
+    color: #7186C2;
+    cursor: pointer;
+    /* Cursor indicates clickable */
+}
+
+.tooltip {
+    position: absolute;
+    background-color: #f9f9f9;
+    color: black;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    border: 1px solid #d3d3d3;
+    z-index: 1;
+    width: 220px;
+    /* Adjust based on your content */
+    bottom: 100%;
+    /* Position it above the icon */
+    left: 50%;
+    /* Start from the middle of the icon */
+    margin-left: -110px;
+    /* Adjust this to move the tooltip to the left so it centers */
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.profile-form-control {
+    position: relative;
+    /* Needed for absolute positioning of the tooltip */
+}
+
+
+
+.add-email-icon {
+    position: absolute;
+    left: 90%;
+    /* Adjust icon position */
+    top: -55%;
+    font-size: 1.6rem;
+    color: #F8C2B5;
+}
+
+.profile-save-button {
+    background-color: #A9B7E0;
+    /* Base color */
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    border-radius: 10px;
+    cursor: pointer;
+    display: block;
+    width: 30%;
+    margin-top: 4rem;
+    margin-left: auto;
+    /* Center the button horizontally */
+    margin-right: auto;
+    /* Center the button horizontally */
+    font-size: 2rem;
+    transition: background-color 0.3s;
+    /* Smooth transition for hover effect */
+}
+
+.profile-save-button:hover {
+    background-color: #9ca8d8;
+    /* Darker shade on hover */
+}
+
+
+
+
+/* /////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+
+
+/* Responsive Media Queries */
+@media screen and (max-width: 1200px) {
+    .profile-sidebar {
+        width: 200px;
+        /* Adjust sidebar width for tablets */
+    }
+
+    .logo-container {
+        margin-right: 80%;
+        margin-top: 10%;
+        /* Adjust logo margin */
+        scale: 0.6;
+    }
+
+    .sidebar-item {
+        font-size: 1.6rem;
+        /* Adjust sidebar font size */
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .profile-page {
+        flex-direction: column;
+        /* Stack sidebar and content vertically on mobile */
+    }
+
+    .profile-sidebar {
+        width: 100%;
+        /* Full width sidebar for mobile */
+        height: 60%;
+    }
+
+    .logo-container {
+        margin-left: 15%;
+        scale: 1.5;
+    }
+
+    .sidebar-nav {
+        margin-top: 10%;
+    }
+
+    .sidebar-item {
+        font-size: 1.4rem;
+        /* Smaller font for mobile */
+    }
+
+    .NavContainers,
+    .NavContainersLast {
+        margin-bottom: 3%;
+        /* Less margin between nav items on mobile */
+    }
+
+    .NavContainersLast {
+        margin-top: 5%;
+    }
+}
+
+
+/* ///////////////////////////////// for profile pic and name and address resizing ////////////////////////////////////////////////////// */
+/* Media Queries for progressively moving right */
+@media screen and (max-width: 1300px) {
+    .profile-image-container {
+        left: 35%;
+    }
+
+    h1.profile-name,
+    .profile-address {
+        left: 50%;
+    }
+}
+
+@media screen and (max-width: 850px) {
+    .profile-image-container {
+        left: 37%;
+    }
+
+    h1.profile-name,
+    .profile-address {
+        left: 57%;
+    }
+
+    .profile-image {
+        width: 110px;
+        height: 110px;
+    }
+}
+
+/* Hiding elements on screen sizes below 768px */
+@media screen and (max-width: 769px) {
+
+    .profile-image-container,
+    h1.profile-name,
+    .profile-address,
+    .profile-image {
+        display: none;
+    }
+}
