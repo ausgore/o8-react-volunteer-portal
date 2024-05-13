@@ -1,22 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CRM from "../../crm";
+import { CustomField } from "../typings/types";
 
-interface CustomFieldProps {
-    name: string;
-    label: string;
-    htmlType: string;
-    value: any;
-    optionGroupId?: number;
-    options?: {
-        name: string;
-        label: string;
-        value: string;
-    }[]
-}
 const customFieldSet = "example";
 
-export default function SecondProfile() {
+export default function Profile() {
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -26,9 +15,21 @@ export default function SecondProfile() {
     const [postalCode, setPostalCode] = useState("");
     const [gender, setGender] = useState<number | null>();
     const [name, setName] = useState("");
-    // Custom field vlaues
-    const [customFields, setCustomFields] = useState<Map<string, CustomFieldProps>>(new Map());
 
+    // Custom field values
+    const [customFields, setCustomFields] = useState<Map<string, CustomField>>(new Map());
+    // Responsible for dynamically updating a field value under custom field map
+    const updateCustomField = (customFieldName: string, value: any) => {
+        const updatedFields = new Map(customFields);
+        const field = updatedFields.get(`${customFieldSet}.${customFieldName}`);
+        if (field) {
+            field.value = value;
+            customFields.set(`${customFieldSet}.${customFieldName}`, field);
+            setCustomFields(updatedFields);
+        }
+    }
+
+    // useEffect to initialize values, DO NOT change
     useEffect(() => {
         const win = window as any;
         const email = win.email ?? "casuarina@octopus8.com";
@@ -57,7 +58,7 @@ export default function SecondProfile() {
             // Use this for custom fields
             // Getting value types of custom field names
             response = await CRM("CustomField", "get", {
-                select: ["name", "label", "html_type", "option_group_id"],
+                select: ["name", "label", "html_type", "option_group_id", "data_type"],
                 where: [["custom_group_id:name", "=", customFieldSet]]
             });
             // Getting the option group IDs to fetch field vlaues
@@ -68,24 +69,27 @@ export default function SecondProfile() {
                 where: [["option_group_id", "IN", optionGroupIds]]
             });
             // Custom fields to be set in state
-            const customFields: Map<string, CustomFieldProps> = new Map(response.data.map((field: any) => (
+            const customFields: Map<string, CustomField> = new Map(response.data.map((field: any) => (
                 [`${customFieldSet}.${field.name}`, {
                     label: field.label,
                     name: field.name,
                     htmlType: field.html_type,
+                    dataType: field.data_type,
                     value: contact[`${customFieldSet}.${field.name}`],
                     optionGroupId: field.option_group_id,
                     options: optionValueResponse.data.filter((opt: any) => opt.option_group_id == field.option_group_id)
                 }]
-            ) as [string, CustomFieldProps]));
-            console.log(customFields);
+            ) as [string, CustomField]));
+            setCustomFields(customFields);
 
             setIsLoading(false);
         })();
     }, []);
 
+    // what happens after clicking on update button
     const updateProfile = async () => {
         setIsUpdating(true);
+        console.log(customFields);
         await CRM("Contact", "update", {
             where: [
                 ["id", "=", id]
@@ -100,13 +104,13 @@ export default function SecondProfile() {
         })
         setIsUpdating(false);
     }
-
-
+    
     return <>
         <h1>Profile Page</h1>
         <Link to="/home">Go to home page</Link>
         {isLoading ? <p>Loading...</p> : <>
             <div style={{ gap: 2 }}>
+                {/* Values before can be hardcoded */}
                 <div style={{ marginBottom: 6 }}>
                     <label>Name </label>
                     <input type="text" value={name} onChange={e => setName(e.target.value)} />
@@ -128,7 +132,22 @@ export default function SecondProfile() {
                     <input type="radio" id="others" name="gender" value={2} defaultChecked={gender == 2} onClick={() => setGender(2)} />
                     <label htmlFor="others">Others</label>
                 </div>
+                {/* Values above can be hardcoded */}
+
+
                 {/* Custom values */}
+                {[...customFields.values()].map((customField) => {
+                    const props = { customField, updateCustomField };
+                    return <div style={{ marginBottom: 6 }}>
+                        {customField.htmlType.toLowerCase() == "checkbox" && <>
+                            {customField.options?.map(option => <>
+                                <label style={{ marginRight: 6 }}>{customField.label}</label>
+                                <label htmlFor={`${customField.name}-${option.name}`}>{option.label}</label>
+                                <input type="checkbox" id={`${customField.name}-${option.name}`} value={option.value} onClick={() => updateCustomField(customField.name, [...customField.value?.length ? customField.value : [null], option.value].filter(v => v))} />
+                            </>)}
+                        </>}
+                    </div>
+                })}
 
                 <button style={{ marginTop: 12, paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2 }} onClick={updateProfile}>
                     {isUpdating ? "Updating..." : "Update"}

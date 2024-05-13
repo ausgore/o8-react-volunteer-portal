@@ -1,21 +1,37 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import CRM from "../../crm";
 import Wrapper from "../components/Wrapper";
-import DefaultField from "../components/DefaultField";
+import DefaultTextField from "../components/DefaultTextField";
+import DefaultDropdownField from "../components/DefaultDropdownField";
+
+import { FiEdit } from "react-icons/fi";
+import { MdSaveAlt, MdOutlineLockReset } from "react-icons/md";
 
 const customFieldSetName = "example";
 
 export default function SecondProfile() {
-    const [isEditing, setIsEditing] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [unsavedProfile, setUnsavedProfile] = useState<any>();
     const [profile, setProfile] = useState<any>();
     const [name, setName] = useState("");
+    const [customFields, setCustomFields] = useState<any>();
 
     const handleProfile = (id: string, value: any) => {
-        const newProfile = {...profile};
+        const newProfile = { ...profile };
         newProfile[id] = value;
         setProfile(newProfile);
     }
-    
+
+    // Responsible for switching the view
+    const handleView = () => {
+        setIsEditing(!isEditing);
+        // If they were previously editing
+        if (isEditing) {
+            setName(`${unsavedProfile.first_name} ${unsavedProfile.last_name}`);
+            setProfile(unsavedProfile);
+        }
+    }
+
     // Initializing pre-data
     useEffect(() => {
         // Currently hardcoded email variable to casuarina@octopus.8com
@@ -23,6 +39,7 @@ export default function SecondProfile() {
         const email = (window as any).email ?? "casuarina@octopus8.com";
         // Fetching default and custom field sets
         (async function () {
+            // Fetching default fields
             let response = await CRM("Contact", "get", {
                 select: [
                     "email_primary.email",
@@ -40,33 +57,102 @@ export default function SecondProfile() {
             const [profile] = response.data;
             setName(`${profile.first_name} ${profile.last_name}`);
             setProfile(profile);
+            setUnsavedProfile(profile);
+
+            // Fetching custom fields
+            response = await CRM("CustomField", "get", {
+                select: ["name", "label", "html_type", "option_group_id", "data_type"],
+                where: [["custom_group_id:name", "=", customFieldSetName]]
+            });
+            // Getting the option group IDs to fetch field vlaues
+            const optionGroupIds = response.data.map((field: any) => field.option_group_id).filter((id: any) => id);
+            // Get all option values that has its group_id in optionGroupIds
+            const optionValueResponse = await CRM("OptionValue", "get", {
+                select: ["label", "value", "name", "option_group_id"],
+                where: [["option_group_id", "IN", optionGroupIds]]
+            });
+            // Custom fields to be set in state
+            const customFields: any = {};
+            for (const field of response.data) {
+                customFields[`${customFieldSetName}.${field.name}`] = {
+                    label: field.label,
+                    name: field.name,
+                    htmlType: field.html_type,
+                    dataType: field.data_type,
+                    value: profile[`${customFieldSetName}.${field.name}`],
+                    optionGroupId: field.option_group_id,
+                    options: optionValueResponse.data.filter((opt: any) => opt.option_group_id == field.option_group_id)
+                }
+            }
+
+            setCustomFields(customFields);
         })();
     }, []);
+
+    const saveChanges = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const profileToUpdate = { ...profile };
+        // This is only for name because it's a unique case, everything else should mostly be automatic
+        profileToUpdate.first_name = name.split(" ")[0];
+        profileToUpdate.last_name = name.split(" ").splice(1, name.split(" ").length).join(" ");
+
+        await CRM("Contact", "update", {
+            where: [["id", "=", profileToUpdate.id]],
+            values: Object.keys(profileToUpdate).map((p: string) => ([p, profileToUpdate[p]]))
+        })
+        
+        setProfile(profileToUpdate);
+        setUnsavedProfile(profileToUpdate);
+    }
 
     return <Wrapper>
         {!profile ? <>
             <h1 className="font-bold text-lg">Loading profile...</h1>
         </> : <div className="p-4">
             {/* Header */}
-            <header className="mb-6">
-                <h1 className="font-bold text-xl">{profile.first_name} {profile.last_name}</h1>
+            <header>
+                <h1 className="font-bold text-xl">{name}</h1>
                 <h2 className="font-semibold text-lg">{profile['address_primary.street_address']}</h2>
             </header>
             {/* Form */}
-            <div className="grid grid-cols-1 gap-x-3 gap-y-3 md:gap-y-8 md:grid-cols-2 max-w-[1200px]">
-                <DefaultField className="flex justify-center" name="Email" id="email_primary.email" profile={profile} disabled={true} />
-                <DefaultField className="flex justify-center" name="Phone" id="phone_primary.phone_numeric" profile={profile} disabled={true} />
-                {/* Name is unique because it's actually using two fields, do not change this unless you know what you're doing */}
-                <div className="flex justify-center">
-                    <div className="w-full md:w-[300px]">
-                        <label htmlFor="name" className={`font-semibold mb-1 ${isEditing ? "" : "opacity-40"}`}>Name</label>
-                        <div className="relative">
-                            <input type="text" id="name" placeholder={name} value={isEditing ? `${name}` : ""} className="w-full py-2 px-4 rounded-[5px] outline-none disabled:bg-white" disabled={!isEditing} onChange={e => setName(e.target.value)} />
-                        </div>
+            <form onSubmit={saveChanges} className="max-w-[1200px]">
+                {/* Buttons */}
+                <div className="flex justify-end mb-20">
+                    <div className="flex gap-x-3">
+                        {isEditing && <button type="submit" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-primary flex justify-between items-center gap-x-3">
+                            <MdSaveAlt />
+                            <span>Save Changes</span>
+                        </button>}
+                        {!isEditing && <button onClick={handleView} type="button" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-primary flex justify-between items-center gap-x-3">
+                            <FiEdit />
+                            <span>Edit</span>
+                        </button>}
+                        <button onClick={handleView} type="button" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-primary flex justify-between items-center gap-x-3">
+                            <MdOutlineLockReset size={18} />
+                            <span>Reset Password</span>
+                        </button>
                     </div>
                 </div>
-                {/* Name is unique because it's actually using two fields, do not change this unless you know what you're doing */}
-            </div>
+                {/* Input fields */}
+                <div className="grid grid-cols-1 gap-x-3 gapy-3 md:gap-y-8 md:grid-cols-2">
+                    {/* Email */}
+                    <DefaultTextField className="flex justify-center" label="Email" id="email_primary.email" fields={profile} disabled={true} showInfo={isEditing} info="Please contact an administrator to have your Email changed" />
+                    {/* Phone */}
+                    <DefaultTextField className="flex justify-center" label="Phone" id="phone_primary.phone_numeric" fields={profile} disabled={true} showInfo={isEditing} info="Please contact an administrator to have your Contact Number changed" />
+                    {/* Name */}
+                    <DefaultTextField className="flex justify-center" label="Name" id="name" disabled={!isEditing} value={name} handleChange={e => setName(e.target.value)} />
+                    {/* Address */}
+                    <DefaultTextField className="flex justify-center" label="Address" id="address_primary.street_address" fields={profile} disabled={!isEditing} handleFields={handleProfile} />
+                    {/* Postal Code */}
+                    <DefaultTextField className="flex justify-center" label="Postal Code" id="address_primary.postal_code" fields={profile} disabled={!isEditing} handleFields={handleProfile} />
+                    {/* Gender */}
+                    <DefaultDropdownField className="flex justify-center" label="Gender" id="gender_id" placeholder="Please choose your gender" fields={profile} disabled={!isEditing} handleFields={handleProfile} options={[
+                        { label: "Male", value: "2" },
+                        { label: "Female", value: "1" },
+                        { label: "Others", value: "0" },
+                    ]} />
+                </div>
+            </form>
         </div>}
     </Wrapper>
 }

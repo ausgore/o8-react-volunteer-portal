@@ -1,4 +1,4 @@
-export interface CustomFIeld {
+export interface CustomField {
     name: string;
     label: string;
     htmlType: string;
@@ -13,6 +13,6 @@ export interface CustomFIeld {
 }
 
 export interface CustomFieldInputProps {
-    customField: CustomFIeld;
+    customField: CustomField;
     updateCustomField: (customFieldName: string, value: any) => void;
 }
