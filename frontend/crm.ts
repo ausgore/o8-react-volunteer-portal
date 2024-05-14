@@ -7,6 +7,7 @@ interface ParamProps {
     where?: [string, ComparisonOperator, any?][];
     order?: any[],
     values?: [string, any][]
+    join?: [string, string, [string, ComparisonOperator, any?]][];
 }
 
 export default async function CRM(entity: string, action: string, params?: ParamProps) {
