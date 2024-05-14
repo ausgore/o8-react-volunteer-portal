@@ -13,6 +13,7 @@ if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
 $entity = $query['entity'];
 $action = $query['action'];
 $select = $query['select'] ?? array();
+$join = $query['join'] ?? array();
 $where = $query['where'] ?? array();
 $order = $query['order'] ?? array();
 $values = $query['values'] ?? array();
@@ -26,6 +27,8 @@ $params = array(
 $params['limit'] = $query['limit'] ?? null;
 if (is_array($select) && !empty($select))
     $params['select'] = $select;
+if (is_array($join) && !empty($join))
+    $params['join'] = $join;
 if (is_array($where) && !empty($where))
     $params['where'] = $where;
 if (is_array($order) && !empty($order)) {
