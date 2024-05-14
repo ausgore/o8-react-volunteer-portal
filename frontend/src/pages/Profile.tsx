@@ -1,65 +1,69 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { FormEvent, useEffect, useState } from "react";
 import CRM from "../../crm";
-import { CustomField } from "../typings/types";
+import Wrapper from "../components/Wrapper";
+import TextField from "../components/TextField";
+import DropdownField from "../components/DropdownField";
 
-const customFieldSet = "example";
+import { FiEdit } from "react-icons/fi";
+import { MdSaveAlt, MdOutlineLockReset } from "react-icons/md";
+import { CustomField, CustomFieldOptions } from "../typings/types";
 
-export default function Profile() {
-    const [isLoading, setIsLoading] = useState(true);
-    const [isUpdating, setIsUpdating] = useState(false);
+const customFieldSetName = "example";
 
-    // Default values
-    const [id, setId] = useState<number | null>();
-    const [address, setAddress] = useState("");
-    const [postalCode, setPostalCode] = useState("");
-    const [gender, setGender] = useState<number | null>();
+export default function SecondProfile() {
+    const [isEditing, setIsEditing] = useState(false);
+    const [unsavedProfile, setUnsavedProfile] = useState<any>();
+    const [profile, setProfile] = useState<any>();
     const [name, setName] = useState("");
+    const [customFields, setCustomFields] = useState<{ [key: string]: CustomField }>();
 
-    // Custom field values
-    const [customFields, setCustomFields] = useState<Map<string, CustomField>>(new Map());
-    // Responsible for dynamically updating a field value under custom field map
-    const updateCustomField = (customFieldName: string, value: any) => {
-        const updatedFields = new Map(customFields);
-        const field = updatedFields.get(`${customFieldSet}.${customFieldName}`);
-        if (field) {
-            field.value = value;
-            customFields.set(`${customFieldSet}.${customFieldName}`, field);
-            setCustomFields(updatedFields);
+    const handleProfile = (id: string, value: any) => {
+        const newProfile = { ...profile };
+        newProfile[id] = value;
+        setProfile(newProfile);
+    }
+
+    // Responsible for switching the view
+    const handleView = () => {
+        setIsEditing(!isEditing);
+        // If they were previously editing
+        if (isEditing) {
+            setName(`${unsavedProfile.first_name} ${unsavedProfile.last_name}`);
+            setProfile(unsavedProfile);
         }
     }
 
-    // useEffect to initialize values, DO NOT change
+    // Initializing pre-data
     useEffect(() => {
-        const win = window as any;
-        const email = win.email ?? "casuarina@octopus8.com";
+        // Currently hardcoded email variable to casuarina@octopus.8com
+        // Remember to change it to be window.email from <scritp> in index.html
+        const email = (window as any).email ?? "casuarina@octopus8.com";
+        // Fetching default and custom field sets
         (async function () {
+            // Fetching default fields
             let response = await CRM("Contact", "get", {
                 select: [
                     "email_primary.email",
                     "address_primary.street_address",
                     "address_primary.postal_code",
+                    "phone_primary.phone_numeric",
                     "gender_id",
                     "first_name",
                     "last_name",
-                    `${customFieldSet}.*`
+                    `${customFieldSetName}.*`
                 ],
                 where: [["email_primary.email", "=", email]]
             });
+            // After fetching from the contact database, populate default fields to set state
+            const [profile] = response.data;
+            setName(`${profile.first_name} ${profile.last_name}`);
+            setProfile(profile);
+            setUnsavedProfile(profile);
 
-            const contact = response.data[0];
-            // Normal fields
-            setId(contact["id"]);
-            setAddress(contact["address_primary.street_address"])
-            setPostalCode(contact["address_primary.postal_code"]);
-            setGender(contact["gender_id"]);
-            setName(`${contact["first_name"]} ${contact["last_name"]}`);
-
-            // Use this for custom fields
-            // Getting value types of custom field names
+            // Fetching custom fields
             response = await CRM("CustomField", "get", {
                 select: ["name", "label", "html_type", "option_group_id", "data_type"],
-                where: [["custom_group_id:name", "=", customFieldSet]]
+                where: [["custom_group_id:name", "=", customFieldSetName]]
             });
             // Getting the option group IDs to fetch field vlaues
             const optionGroupIds = response.data.map((field: any) => field.option_group_id).filter((id: any) => id);
@@ -69,90 +73,104 @@ export default function Profile() {
                 where: [["option_group_id", "IN", optionGroupIds]]
             });
             // Custom fields to be set in state
-            const customFields: Map<string, CustomField> = new Map(response.data.map((field: any) => (
-                [`${customFieldSet}.${field.name}`, {
+            const customFields: any = {};
+            for (const field of response.data) {
+                customFields[`${customFieldSetName}.${field.name}`] = {
                     label: field.label,
                     name: field.name,
                     htmlType: field.html_type,
                     dataType: field.data_type,
-                    value: contact[`${customFieldSet}.${field.name}`],
                     optionGroupId: field.option_group_id,
                     options: optionValueResponse.data.filter((opt: any) => opt.option_group_id == field.option_group_id)
-                }]
-            ) as [string, CustomField]));
-            setCustomFields(customFields);
+                }
+            }
 
-            setIsLoading(false);
+            setCustomFields(customFields);
         })();
     }, []);
 
-    // what happens after clicking on update button
-    const updateProfile = async () => {
+    const [isUpdating, setIsUpdating] = useState(false);
+    // Saving changes
+    const saveChanges = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         setIsUpdating(true);
-        console.log(customFields);
+
+        const profileToUpdate = { ...profile };
+        // This is only for name because it's a unique case, everything else should mostly be automatic
+        profileToUpdate.first_name = name.split(" ")[0];
+        profileToUpdate.last_name = name.split(" ").splice(1, name.split(" ").length).join(" ");
+
         await CRM("Contact", "update", {
-            where: [
-                ["id", "=", id]
-            ],
-            values: [
-                ["address_primary.street_address", address],
-                ["address_primary.postal_code", postalCode],
-                ["gender_id", gender],
-                ["first_name", name.split(" ").splice(0, name.split(" ").length - 1).join(" ")],
-                ["last_name", name.split(" ")[name.split(" ").length - 1]]
-            ]
-        })
+            where: [["id", "=", profileToUpdate.id]],
+            values: Object.keys(profileToUpdate).map((p: string) => ([p, profileToUpdate[p]]))
+        });
+        alert("Successfully updated profile.");
+        
         setIsUpdating(false);
+        setProfile(profileToUpdate);
+        setUnsavedProfile(profileToUpdate);
+        setIsEditing(false);
     }
-    
-    return <>
-        <h1>Profile Page</h1>
-        <Link to="/home">Go to home page</Link>
-        {isLoading ? <p>Loading...</p> : <>
-            <div style={{ gap: 2 }}>
-                {/* Values before can be hardcoded */}
-                <div style={{ marginBottom: 6 }}>
-                    <label>Name </label>
-                    <input type="text" value={name} onChange={e => setName(e.target.value)} />
-                </div>
-                <div style={{ marginBottom: 6 }}>
-                    <label>Address </label>
-                    <input type="text" value={address} onChange={e => setAddress(e.target.value)} />
-                </div>
-                <div style={{ marginBottom: 6 }}>
-                    <label>Postal Code </label>
-                    <input type="text" value={postalCode} onChange={e => setPostalCode(e.target.value)} />
-                </div>
-                <div style={{ marginBottom: 6 }}>
-                    <p>Gender</p>
-                    <input type="radio" id="male" name="gender" value={0} defaultChecked={gender == 0} onClick={() => setGender(0)} />
-                    <label htmlFor="male">Male</label>
-                    <input type="radio" id="female" name="gender" value={1} defaultChecked={gender == 1} onClick={() => setGender(1)} />
-                    <label htmlFor="female">Female</label>
-                    <input type="radio" id="others" name="gender" value={2} defaultChecked={gender == 2} onClick={() => setGender(2)} />
-                    <label htmlFor="others">Others</label>
-                </div>
-                {/* Values above can be hardcoded */}
 
-
-                {/* Custom values */}
-                {[...customFields.values()].map((customField) => {
-                    const props = { customField, updateCustomField };
-                    return <div style={{ marginBottom: 6 }}>
-                        {customField.htmlType.toLowerCase() == "checkbox" && <>
-                            {customField.options?.map(option => <>
-                                <label style={{ marginRight: 6 }}>{customField.label}</label>
-                                <label htmlFor={`${customField.name}-${option.name}`}>{option.label}</label>
-                                <input type="checkbox" id={`${customField.name}-${option.name}`} value={option.value} onClick={() => updateCustomField(customField.name, [...customField.value?.length ? customField.value : [null], option.value].filter(v => v))} />
-                            </>)}
-                        </>}
+    return <Wrapper>
+        {!profile || !customFields ? <>
+            <h1 className="font-bold text-lg">Loading profile...</h1>
+        </> : <div className="p-4 mb-12">
+            {/* Header */}
+            <header>
+                <h1 className="font-bold text-xl">{name}</h1>
+                <h2 className="font-semibold text-lg">{profile['address_primary.street_address']}</h2>
+            </header>
+            {/* Form */}
+            <form onSubmit={saveChanges} className="max-w-[1200px]">
+                {/* Buttons */}
+                <div className="flex justify-end mb-20">
+                    <div className="flex gap-x-3">
+                        {isEditing && <button type="submit" className={`text-white font-semibold text-sm rounded-md py-[6px] px-4 flex justify-between items-center gap-x-3 ${isUpdating ? "bg-primary/50" :"bg-primary"}`} disabled={isUpdating}>
+                            <MdSaveAlt />
+                            <span>{isUpdating ? "Updating..." : "Save Changes"}</span>
+                        </button>}
+                        {!isEditing && <button onClick={handleView} type="button" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-primary flex justify-between items-center gap-x-3">
+                            <FiEdit />
+                            <span>Edit</span>
+                        </button>}
+                        <button type="button" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-primary flex justify-between items-center gap-x-3">
+                            <MdOutlineLockReset size={18} />
+                            <span>Reset Password</span>
+                        </button>
                     </div>
-                })}
+                </div>
+                {/* Input fields */}
+                <div className="grid grid-cols-1 gap-x-3 gap-y-6 md:gap-y-8 md:grid-cols-2">
+                    {/* Email */}
+                    <TextField className="flex justify-center" label="Email" id="email_primary.email" fields={profile} disabled={true} showInfo={isEditing} info="Please contact an administrator to have your Email changed" />
+                    {/* Phone */}
+                    <TextField className="flex justify-center" label="Phone" id="phone_primary.phone_numeric" fields={profile} disabled={true} showInfo={isEditing} info="Please contact an administrator to have your Contact Number changed" />
+                    {/* Name */}
+                    <TextField className="flex justify-center" label="Name" id="name" disabled={!isEditing} value={name} handleChange={e => setName(e.target.value)} />
+                    {/* Address */}
+                    <TextField className="flex justify-center" label="Address" id="address_primary.street_address" fields={profile} disabled={!isEditing} handleFields={handleProfile} />
+                    {/* Postal Code */}
+                    <TextField className="flex justify-center" label="Postal Code" id="address_primary.postal_code" fields={profile} disabled={!isEditing} handleFields={handleProfile} />
+                    {/* Gender */}
+                    <DropdownField className="flex justify-center" label="Gender" id="gender_id" placeholder="Please choose your gender" fields={profile} disabled={!isEditing} handleFields={handleProfile} options={[
+                        { label: "Male", value: "2" },
+                        { label: "Female", value: "1" },
+                        { label: "Others", value: "0" },
+                    ]} />
 
-                <button style={{ marginTop: 12, paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2 }} onClick={updateProfile}>
-                    {isUpdating ? "Updating..." : "Update"}
-                </button>
-            </div>
-        </>}
-    </>
+                    {/* Custom  fields */}
+                    {customFields && Object.values(customFields).map((field: CustomField) => {
+                        const id = `${customFieldSetName}.${field.name}`
+                        switch (field.htmlType) {
+                            case "Text":
+                                return <TextField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} />
+                            case "Radio":
+                                return <DropdownField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} options={field.options as CustomFieldOptions[]} />
+                        }
+                    })}
+                </div>
+            </form>
+        </div>}
+    </Wrapper>
 }

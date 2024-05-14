@@ -1,3 +1,9 @@
+export interface CustomFieldOptions {
+    name?: string;
+    label: string;
+    value: any;
+}
+
 export interface CustomField {
     name: string;
     label: string;
@@ -5,11 +11,7 @@ export interface CustomField {
     dataType: string;
     value: any;
     optionGroupId?: number;
-    options?: {
-        name: string;
-        label: string;
-        value: string;
-    }[]
+    options?: CustomFieldOptions[];
 }
 
 export interface CustomFieldInputProps {

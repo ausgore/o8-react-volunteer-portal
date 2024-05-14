@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from "react";
 import { MdInfoOutline } from "react-icons/md";
 
-interface DefaultTextFieldProps {
+interface TextFieldProps {
     id: string;
     label: string;
     /** The info message if there's any */
@@ -19,7 +19,7 @@ interface DefaultTextFieldProps {
     className?: string;
 }
 
-export default function DefaultTextField(props: DefaultTextFieldProps) {
+export default function TextField(props: TextFieldProps) {
     const [isHovering, setIsHovering] = useState(false);
     const handleHovering = () => setIsHovering(!isHovering);
     
