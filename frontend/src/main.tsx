@@ -6,7 +6,6 @@ import Profile from "./pages/Profile";
 
 import "./css/profile.css";
 import "./main.css";
-import SecondProfile from "./pages/SecondProfile";
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -14,7 +13,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 		<HashRouter>
 			<Routes>
 				<Route index path="/" element={<Home />} />
-				<Route path="/profile" element={<SecondProfile />} />
+				<Route path="/profile" element={<Profile />} />
 			</Routes>
 		</HashRouter>
 	</React.StrictMode>
