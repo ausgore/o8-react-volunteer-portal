@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 
 import "./main.css";
+import Events from "./pages/Events";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>
@@ -12,6 +13,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 			<Routes>
 				<Route index path="/" element={<Home />} />
 				<Route path="/profile" element={<Profile />} />
+				<Route path="/events" element={<Events />} />
 			</Routes>
 		</HashRouter>
 	</React.StrictMode>

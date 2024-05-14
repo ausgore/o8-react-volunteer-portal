@@ -1,9 +1,9 @@
 import { PropsWithChildren } from "react";
-import SideNavbar from "./SideNavbar";
+import Navbar from "./Navbar";
 
 export default function Wrapper(props: PropsWithChildren) {
     return <>
-        <SideNavbar />
+        <Navbar />
         <div className="ml-56">
             {props.children}
         </div>
