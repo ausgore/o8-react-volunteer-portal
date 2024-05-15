@@ -105,7 +105,7 @@ export default function SecondProfile() {
             values: Object.keys(profileToUpdate).map((p: string) => ([p, profileToUpdate[p]]))
         });
         alert("Successfully updated profile.");
-        
+
         setIsUpdating(false);
         setProfile(profileToUpdate);
         setUnsavedProfile(profileToUpdate);
@@ -114,63 +114,75 @@ export default function SecondProfile() {
 
     return <Wrapper>
         {!profile || !customFields ? <>
-            <h1 className="font-bold text-lg">Loading profile...</h1>
-        </> : <div className="p-4 mb-12">
+            <h1 className="font-semibold text-lg">Loading profile...</h1>
+        </> : <div className="mb-12">
             {/* Header */}
-            <header>
-                <h1 className="font-bold text-xl">{name}</h1>
-                <h2 className="font-semibold text-lg">{profile['address_primary.street_address']}</h2>
-            </header>
-            {/* Form */}
-            <form onSubmit={saveChanges} className="max-w-[1200px]">
-                {/* Buttons */}
-                <div className="flex justify-end mb-20">
-                    <div className="flex gap-x-3">
-                        {isEditing && <button type="submit" className={`text-white font-semibold text-sm rounded-md py-[6px] px-4 flex justify-between items-center gap-x-3 ${isUpdating ? "bg-primary/50" :"bg-primary"}`} disabled={isUpdating}>
-                            <MdSaveAlt />
-                            <span>{isUpdating ? "Updating..." : "Save Changes"}</span>
-                        </button>}
-                        {!isEditing && <button onClick={handleView} type="button" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-primary flex justify-between items-center gap-x-3">
-                            <FiEdit />
-                            <span>Edit</span>
-                        </button>}
-                        <button type="button" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-primary flex justify-between items-center gap-x-3">
-                            <MdOutlineLockReset size={18} />
-                            <span>Reset Password</span>
-                        </button>
+            <div className="p-4 relative bg-primary/20 h-[140px]">
+                <h1 className="">Profile</h1>
+                <div className="flex flex-row items-center absolute -bottom-[44%] lg:left-20">
+                    {/* Profile picture */}
+                    <div className="w-[130px] h-[130px] rounded-full bg-gray-400 mr-6 border-[#f4f5fb] border-8">
+                        
+                    </div>
+                    {/* Profile name and address */}
+                    <div className="grid grid-cols-1 gap-y-6">
+                        <h1 className="font-bold text-2xl">{name}</h1>
+                        <h2 className="font-semibold">{profile['address_primary.street_address']}</h2>
                     </div>
                 </div>
-                {/* Input fields */}
-                <div className="grid grid-cols-1 gap-x-3 gap-y-6 md:gap-y-8 md:grid-cols-2">
-                    {/* Email */}
-                    <TextField className="flex justify-center" label="Email" id="email_primary.email" fields={profile} disabled={true} showInfo={isEditing} info="Please contact an administrator to have your Email changed" />
-                    {/* Phone */}
-                    <TextField className="flex justify-center" label="Phone" id="phone_primary.phone_numeric" fields={profile} disabled={true} showInfo={isEditing} info="Please contact an administrator to have your Contact Number changed" />
-                    {/* Name */}
-                    <TextField className="flex justify-center" label="Name" id="name" disabled={!isEditing} value={name} handleChange={e => setName(e.target.value)} />
-                    {/* Address */}
-                    <TextField className="flex justify-center" label="Address" id="address_primary.street_address" fields={profile} disabled={!isEditing} handleFields={handleProfile} />
-                    {/* Postal Code */}
-                    <TextField className="flex justify-center" label="Postal Code" id="address_primary.postal_code" fields={profile} disabled={!isEditing} handleFields={handleProfile} />
-                    {/* Gender */}
-                    <DropdownField className="flex justify-center" label="Gender" id="gender_id" placeholder="Please choose your gender" fields={profile} disabled={!isEditing} handleFields={handleProfile} options={[
-                        { label: "Male", value: "2" },
-                        { label: "Female", value: "1" },
-                        { label: "Others", value: "0" },
-                    ]} />
+            </div>
+            {/* Form */}
+            <div className="p-4">
+                <form onSubmit={saveChanges} className="max-w-[1200px]">
+                    {/* Buttons */}
+                    <div className="flex justify-end mb-20">
+                        <div className="flex gap-x-3">
+                            {isEditing && <button type="submit" className={`text-white font-semibold text-sm rounded-md py-[6px] px-4 flex justify-between items-center gap-x-3 ${isUpdating ? "bg-primary" : "bg-secondary"}`} disabled={isUpdating}>
+                                <MdSaveAlt />
+                                <span>{isUpdating ? "Updating..." : "Save Changes"}</span>
+                            </button>}
+                            {!isEditing && <button onClick={handleView} type="button" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-secondary flex justify-between items-center gap-x-3">
+                                <FiEdit />
+                                <span>Edit</span>
+                            </button>}
+                            <button type="button" className="text-white font-semibold text-sm rounded-md py-[6px] px-4 bg-secondary flex justify-between items-center gap-x-3">
+                                <MdOutlineLockReset size={18} />
+                                <span>Reset Password</span>
+                            </button>
+                        </div>
+                    </div>
+                    {/* Input fields */}
+                    <div className="grid grid-cols-1 gap-x-3 gap-y-6 md:gap-y-8 md:grid-cols-2">
+                        {/* Email */}
+                        <TextField className="flex justify-center" label="Email" id="email_primary.email" fields={profile} disabled={true} showInfo={isEditing} info="Please contact an administrator to have your Email changed" />
+                        {/* Phone */}
+                        <TextField className="flex justify-center" label="Phone" id="phone_primary.phone_numeric" fields={profile} disabled={true} showInfo={isEditing} info="Please contact an administrator to have your Contact Number changed" />
+                        {/* Name */}
+                        <TextField className="flex justify-center" label="Name" id="name" disabled={!isEditing} value={name} handleChange={e => setName(e.target.value)} />
+                        {/* Address */}
+                        <TextField className="flex justify-center" label="Address" id="address_primary.street_address" fields={profile} disabled={!isEditing} handleFields={handleProfile} />
+                        {/* Postal Code */}
+                        <TextField className="flex justify-center" label="Postal Code" id="address_primary.postal_code" fields={profile} disabled={!isEditing} handleFields={handleProfile} />
+                        {/* Gender */}
+                        <DropdownField className="flex justify-center" label="Gender" id="gender_id" placeholder="Please choose your gender" fields={profile} disabled={!isEditing} handleFields={handleProfile} options={[
+                            { label: "Male", value: "2" },
+                            { label: "Female", value: "1" },
+                            { label: "Others", value: "0" },
+                        ]} />
 
-                    {/* Custom  fields */}
-                    {customFields && Object.values(customFields).map((field: CustomField) => {
-                        const id = `${customFieldSetName}.${field.name}`
-                        switch (field.htmlType) {
-                            case "Text":
-                                return <TextField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} />
-                            case "Radio":
-                                return <DropdownField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} options={field.options as CustomFieldOptions[]} />
-                        }
-                    })}
-                </div>
-            </form>
+                        {/* Custom  fields */}
+                        {customFields && Object.values(customFields).map((field: CustomField) => {
+                            const id = `${customFieldSetName}.${field.name}`
+                            switch (field.htmlType) {
+                                case "Text":
+                                    return <TextField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} />
+                                case "Radio":
+                                    return <DropdownField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} options={field.options as CustomFieldOptions[]} />
+                            }
+                        })}
+                    </div>
+                </form>
+            </div>
         </div>}
     </Wrapper>
 }
