@@ -47,7 +47,7 @@ export default function TextField(props: TextFieldProps) {
             </div>  
             {/* Text Input */}
             <div className="relative">
-                <input type="text" id={props.id} className="w-full py-2 px-4 rounded-[5px] disabled:bg-white outline-none" value={props.disabled ? "" : props.value != undefined ? props.value : props.fields[props.id]} placeholder={props.value != undefined ? props.value : props.fields[props.id]} disabled={props.disabled} onChange={onChange} />
+                <input type="text" id={props.id} className="w-full py-2 px-4 rounded-[5px] disabled:bg-white disabled:cursor-not-allowed outline-none" value={props.disabled ? "" : props.value != undefined ? props.value : props.fields[props.id]} placeholder={props.value != undefined ? props.value : props.fields[props.id]} disabled={props.disabled} onChange={onChange} />
             </div>
         </div>
     </div>

@@ -44,7 +44,7 @@ export default function EventCard(props: EventCardProps) {
                     <span className="text-sm font-semibold">{volunteers}{props.event["event_details.vacancy"] ? ` out of ${props.event["event_details.vacancy"]} people` : " have joined"}</span>
                 </div>
                 {/* Read More */}
-                <button className="text-white bg-primary text-center w-full rounded-md text-sm mt-6 p-1" onClick={() => navigate(`/events/${props.event.id}`)}>
+                <button className="text-white bg-secondary text-center w-full rounded-md text-sm mt-6 p-1" onClick={() => navigate(`/events/${props.event.id}`)}>
                     Read More
                 </button>
             </div>

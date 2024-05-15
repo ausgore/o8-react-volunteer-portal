@@ -6,7 +6,7 @@ import EventCard from "../components/EventCard";
 // The specific volunteer event activity type name to get
 const eventActivityTypeName = "volunteer event";
 // The custom field set name that is used under the volunteer event activity type
-const eventDetailsCustomFieldSetName = "event_details";
+const customFieldSetName = "event_details";
 
 export default function Events() {
     const [events, setEvents] = useState<[] | null>();
@@ -17,7 +17,7 @@ export default function Events() {
             const response = await CRM("Activity", "get", {
                 select: [
                     "activity_type_id:name",
-                    `${eventDetailsCustomFieldSetName}.*`,
+                    `${customFieldSetName}.*`,
                     "subject",
                     "location",
                     "activity_date_time",
@@ -26,7 +26,6 @@ export default function Events() {
                 where: [["activity_type_id:name", "=", eventActivityTypeName]],
             });
             setEvents(response.data);
-            console.log(response.data);
         })();
     }, []);
 
