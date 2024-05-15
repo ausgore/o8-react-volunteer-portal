@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CRM from "../../crm";
+import Wrapper from "../components/Wrapper";
 import axios from "axios";
 
 // Define the type for volunteered activity details
@@ -18,6 +19,11 @@ interface VolunteerActivityDetails {
     Max_Volunteers: string;
 }
 
+const custom_group_participation_details = 'participation_details';
+const activity_type_event_participation = 'Volunteer Event Participation';
+
+const custom_group_event_details = 'event_details';
+
 export default function Home() {
     const [volunteeredActivities, setVolunteeredActivities] = useState<any[]>([]);
     const [volunteeredActivitiesDetails, setVolunteeredActivitiesDetails] = useState<VolunteerActivityDetails[]>([]);
@@ -31,22 +37,21 @@ export default function Home() {
         (async function () {
             const response1 = await CRM('Activity', 'get', {
                 select: [
-                    'Volunteer_Event_Participation.Event_Activity_ID',
-                    'Volunteer_Event_Participation.Status:label',
-                    'Volunteer_Event_Participation.Recorded_Start_Date',
-                    'Volunteer_Event_Participation.Recorded_End_Date',
-                    'Volunteer_Event_Participation.Hours_Volunteered',
-                    'activity_contact.contact_id.email_primary.email',
+                    'status_id:name',
+                    // custom_group_participation_details + '.*',
+                    custom_group_participation_details + '.recorded_start',
+                    custom_group_participation_details + '.recorded_end',
+                    custom_group_participation_details + '.event_activity_id',
                 ],
                 join: [
                     ['ActivityContact AS activity_contact', 'LEFT', ['id', '=', 'activity_contact.activity_id']],
                 ],
                 where: [
                     ['activity_contact.contact_id.email_primary.email', '=', email],
-                    ['activity_type_id:label', '=', 'Volunteering Event Sign-Up'],
+                    ['activity_type_id:label', '=', activity_type_event_participation],
                 ],
                 order: [
-                    ["id", "ASC"]
+                    ['id', 'ASC']
                 ],
                 limit: 0,
             });
@@ -54,69 +59,73 @@ export default function Home() {
 
             setVolunteeredActivities(response1.data);
 
-            let hoursVolunteeredCalc = 0;
-            let numEventsParticipatedCalc = 0;
-
             // Create an array to hold promises for fetching details
             const detailPromises = response1.data.map(async (activity: any) => {
                 const response2 = await CRM('Activity', 'get', {
                     select: [
-                        'Volunteer_Event_Details.Title',
-                        'Volunteer_Event_Details.Tagline',
-                        'Volunteer_Event_Details.Description',
-                        'Volunteer_Event_Details.Responsibilities',
-                        'Volunteer_Event_Details.Requirements',
-                        'Volunteer_Event_Details.Location',
-                        'Volunteer_Event_Details.Event_Start_Date',
-                        'Volunteer_Event_Details.Event_End_Date',
-                        'Volunteer_Event_Details.Registration_Start_Date',
-                        'Volunteer_Event_Details.Registration_End_Date',
-                        'Volunteer_Event_Details.Max_Volunteers',
+                        'subject',
+                        // 'details',
+                        'location',
+                        'activity_date_time',
+                        // 'duration',
+                        // custom_group_event_details + '.*',
                     ],
                     where: [
-                        ['id', '=', activity['Volunteer_Event_Participation.Event_Activity_ID']]
+                        ['id', '=', activity[custom_group_participation_details + '.event_activity_id']]
                     ],
                     order: [
                         ["id", "ASC"]
                     ],
                     limit: 0,
                 });
-                console.log(response2.data);
+                console.log(response2.data[0]);
 
-                return response2.data;
+                return { status: activity, details: response2.data[0] };
+                // return response2.data;
             });
 
             // Wait for all detail promises to resolve
             const allDetails = await Promise.all(detailPromises);
+            console.log(allDetails);
+            // const flattenedAllDetails = allDetails.flatMap(innerArray => innerArray);
 
-            const flattenedAllDetails = allDetails.flatMap(innerArray => innerArray)
 
-            setVolunteeredActivitiesDetails(flattenedAllDetails);
+            let hoursVolunteeredCalc = 0;
+            let numEventsParticipatedCalc = 0;
 
             // Calculate hours and events participated
-            response1.data.forEach((activity: any) => {
-                hoursVolunteeredCalc += activity['Volunteer_Event_Participation.Hours_Volunteered'];
+            allDetails.forEach(({ status, details }: any) => {
+                if (status['status_id:name'] === 'Completed') {
+                    let start = new Date(status[custom_group_participation_details + '.recorded_start']);
+                    let end = new Date(status[custom_group_participation_details + '.recorded_end']);
+                    let timeDifference = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+                    hoursVolunteeredCalc += parseFloat(timeDifference.toFixed(1));
 
-                if (activity['Volunteer_Event_Participation.Status:label'] === 'Completed') {
                     numEventsParticipatedCalc++;
                 }
             });
 
+            setVolunteeredActivitiesDetails(allDetails);
             setHoursVolunteered(hoursVolunteeredCalc);
             setNumEventsParticipated(numEventsParticipatedCalc);
         })();
     }, [])
 
-    return <>
-        <h1>Home Page</h1>
-        <Link to="/profile">Go to profile page</Link>
-        <h1>Volunteered Activities</h1>
+    return <Wrapper>
+        {/* <h1>Home Page</h1>
+        <Link to="/profile">Go to profile page</Link> */}
+        <h1><b>Volunteered Activities</b></h1>
         Number of Hours Volunteered: {hoursVolunteered}<br />
-        Volunteering Events Participated: {numEventsParticipated}<br />
-        Volunteering Status
-        {volunteeredActivities.length > 0 && <pre>{JSON.stringify(volunteeredActivities, null, 2)}</pre>}<br />
-        Volunteering Event
-        {volunteeredActivitiesDetails.length > 0 && <pre>{JSON.stringify(volunteeredActivitiesDetails, null, 2)}</pre>}
-        <h1>Upcoming Activities</h1>
-    </>
+        Volunteering Events Participated: {numEventsParticipated}<br /><br />
+        {volunteeredActivitiesDetails.map(({ status, details }: any, index) => (
+            <div key={index}>
+                <h2>Event Name: {details['subject']}</h2>
+                <h3>Date, Time: {details['activity_date_time']}</h3>
+                <h3>Status: {status['status_id:name']}</h3>
+                <h3>Location: {details['location']}</h3>
+                <br/>
+            </div>
+        ))}
+        <h1><b>Upcoming Activities</b></h1>
+    </Wrapper>
 }
