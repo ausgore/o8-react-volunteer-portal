@@ -24,7 +24,6 @@ $params = array(
 );
 
 // Conditional checking
-$params['limit'] = $query['limit'] ?? null;
 if (is_array($select) && !empty($select))
     $params['select'] = $select;
 if (is_array($join) && !empty($join))

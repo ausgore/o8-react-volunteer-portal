@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { CustomFieldOptions } from "../typings/types";
+import { FieldOptions } from "../typings/types";
 
 interface DropdownField {
     id: string;
@@ -10,7 +10,7 @@ interface DropdownField {
     disabled?: boolean;
     className?: string;
     placeholder?: string;
-    options: CustomFieldOptions[];
+    options: FieldOptions[];
     label: string;
 }
 

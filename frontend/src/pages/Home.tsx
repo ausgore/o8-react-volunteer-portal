@@ -32,7 +32,7 @@ export default function Home() {
 
     useEffect(() => {
         const win = window as any;
-        const email = win.email ?? "mjlee2605@gmail.com";
+        const email = win.email ?? "casuarina@octopus8.com";
 
         (async function () {
             const response1 = await CRM('Activity', 'get', {
@@ -126,6 +126,5 @@ export default function Home() {
                 <br/>
             </div>
         ))}
-        <h1><b>Upcoming Activities</b></h1>
     </Wrapper>
 }

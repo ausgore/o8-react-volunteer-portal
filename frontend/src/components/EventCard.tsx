@@ -10,28 +10,39 @@ interface EventCardProps {
     className?: string;
 }
 
+const customParticipationDetailsSetName  = 'participation_details';
+
 export default function EventCard(props: EventCardProps) {
     const [volunteers, setVolunteers] = useState(0);
     useEffect(() => {
         (async () => {
-            const response = await CRM("ActivityContact", "get", {
-                select: ["id"],
-                where: [["activity_id", "=", props.event.id]]
+            const response = await CRM("ACtivityContact", "get", {
+                select: ["contact_id.email_primary.email"],
+                where: [[`activity_id.${customParticipationDetailsSetName}.event_activity_id`, "=", props.event.id]]
             });
             setVolunteers(response.data.length);
         })();
     }, []);
+    // useEffect(() => {
+    //     (async () => {
+    //         const response = await CRM("ActivityContact", "get", {
+    //             select: ["id"],
+    //             where: [["activity_id", "=", props.event.id]]
+    //         });
+    //         setVolunteers(response.data.length);
+    //     })();
+    // }, []);
 
     const navigate = useNavigate();
 
     return <div className={props.className}>
         <div className="bg-white w-full shadow-md rounded-md p-4 transition-transform duration-300 transform hover:scale-105">
-            <h1 className="font-semibold mb-4 text-lg">{props.event.subject}</h1>
+            <h1 className="font-semibold mb-4">{props.event.subject}</h1>
             <div className="grid grid-rows-1 gap-y-2 text-black/70">
                 {/* Date and Time */}
                 <div className="gap-x-3 flex items-center">
                     <FiCalendar className="text-secondary" />
-                    <span className="text-sm font-semibold">{moment(props.event.activity_date_time).format("D MMMM YYYY, h:mma")}</span>
+                    <span className="text-sm font-semibold">{moment(props.event.activity_date_time).format("D MMM YYYY, h:mma")}</span>
                 </div>
                 {/* Location */}
                 <div className="gap-x-3 flex items-center">
