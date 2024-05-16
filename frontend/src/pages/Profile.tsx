@@ -37,7 +37,7 @@ export default function SecondProfile() {
     useEffect(() => {
         // Currently hardcoded email variable to casuarina@octopus.8com
         // Remember to change it to be window.email from <scritp> in index.html
-        const email = (window as any).email ?? "casuarina@octopus8.com";
+        const email = (window as any).email ?? "mjlee2605@gmail.com";
         // Fetching default and custom field sets
         (async function () {
             // Fetching default fields
