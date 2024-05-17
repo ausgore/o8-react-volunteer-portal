@@ -4,10 +4,40 @@ import { CgProfile } from "react-icons/cg";
 import O8Logo from "../../assets/O8Logo.png";
 import { PiSignOutBold } from "react-icons/pi";
 import { LuCalendarRange } from "react-icons/lu";
+import axios from "axios";
+import { useState } from "react";
+import ConfirmationModal from "../ConfirmationModal";
 
 export default function Navbar() {
-    return <nav className="h-full w-56 fixed bg-white">
-        <div className="h-full flex flex-col">
+    const [isSigningOut, setIsSigningOut] = useState(false);
+    const signOut = async () => {
+        setIsSigningOut(true);
+        await axios.get("http://localhost/wordpress/portal/api/logout.php");
+        window.location.href = `${window.location.protocol}//${window.location.hostname}/wordpress/wp-login.php?redirect_to=${encodeURIComponent(window.location.href)}`;
+    }
+
+    const [showModal, setShowModal] = useState(false);
+
+    // Open modal
+    const openModal = () => {
+        setShowModal(true);
+        document.body.style.overflow = 'hidden';
+    }
+    // Close modal
+    const closeModal = () => {
+        setShowModal(false);
+        document.body.style.overflow = '';
+    };
+
+
+    return <>
+        <ConfirmationModal showModal={showModal} closeModal={closeModal}>
+            <h1>Hello World</h1>
+            <button className="text-sm font-semibold bg-secondary disabled:bg-primary rounded-md p-2 w-[140px] text-white self-center mt-4" onClick={signOut} disabled={isSigningOut}>
+                {isSigningOut ? "Signing Out..." : "Sign Out"}
+            </button>
+        </ConfirmationModal>
+        <nav className="h-full w-56 fixed bg-white flex flex-col">
             {/* Responsible for the image */}
             <div className="p-4 flex items-center">
                 <img src={O8Logo} />
@@ -34,13 +64,11 @@ export default function Navbar() {
                         </div>
                     </Link>
                 </div>
-                <Link to="/">
-                    <div className="hover:bg-primary/30 text-secondary hover:text-secondary/90 border-l-[5px] border-l-transparent hover:border-l-secondary/70 font-semibold flex pl-12 py-2 mb-2 items-center gap-x-4">
-                        <PiSignOutBold />
-                        <span>Sign Out</span>
-                    </div>
-                </Link>
+                <button onClick={openModal} className="hover:bg-primary/30 text-secondary hover:text-secondary/90 border-l-[5px] border-l-transparent hover:border-l-secondary/70 font-semibold flex pl-12 py-2 mb-2 items-center gap-x-4">
+                    <PiSignOutBold />
+                    <span>Sign Out</span>
+                </button>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </>
 }

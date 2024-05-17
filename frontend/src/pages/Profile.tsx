@@ -8,6 +8,7 @@ import ResetPassword from "../assets/ResetPassword.png";
 import { FiEdit } from "react-icons/fi";
 import { MdSaveAlt, MdOutlineLockReset } from "react-icons/md";
 import { CustomField, FieldOptions } from "../typings/types";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const customFieldSetName = "example";
 
@@ -33,7 +34,7 @@ export default function SecondProfile() {
         setIsEditing(!isEditing);
         // If they were previously editing
         if (isEditing) {
-            setName(`${unsavedProfile.first_name} ${unsavedProfile.last_name}`);
+            setName(`${unsavedProfile.first_name} ${unsavedProfile.last_name ?? ""}`);
             setProfile(unsavedProfile);
         }
     }
@@ -58,7 +59,7 @@ export default function SecondProfile() {
             });
             // After fetching from the contact database, populate default fields to set state
             const [profile] = response.data;
-            setName(`${profile.first_name} ${profile.last_name}`);
+            setName(`${profile.first_name}${profile.last_name?.length ? ` ${profile.last_name}` : ""}`);
             setProfile(profile);
             setUnsavedProfile(profile);
 
@@ -131,24 +132,14 @@ export default function SecondProfile() {
         {!profile || !customFields ? <>
             <h1 className="font-semibold text-lg">Loading profile...</h1>
         </> : <>
-            {/* Modal */}
-            {showModal && (
-                // Background
-                <div className="fixed inset-0 bg-gray-400 bg-opacity-20 flex justify-center items-center z-50 backdrop-blur-md">
-                    {/* Body */}
-                    <div className="bg-white p-5 pt-12 pb-6 rounded-xl relative max-w-[310px] h-max shadow-md flex flex-col justify-center text-center">
-                        <button className="absolute top-0 right-0 mr-4 mt-2 text-gray-600 text-3xl font-semibold" onClick={closeModal}>&times;</button>
-                        {/* Image */}
-                        <div className="max-w-[200px] h-[120px] self-center justify-center flex items-center">
-                            <img src={ResetPassword} alt="reset-pass" className="w-full h-full" />
-                        </div>
-                        <h1 className="font-semibold text-lg mt-4">Reset Email Sent</h1>
-                        <p className="text-gray-500 text-sm mt-2">We have sent an email with a password reset link to <span className="text-gray-600 font-semibold">{email}</span></p>
-                        <button className="text-sm font-semibold bg-secondary rounded-md p-2 w-[140px] text-white self-center mt-4" onClick={closeModal}>Got it</button>
-                        <p className="font-semibold text-sm mt-2 text-gray-400">Send Again</p>
-                    </div>
-                </div>
-            )}
+            <ConfirmationModal showModal={showModal} closeModal={closeModal} image={ResetPassword}>
+                <h1 className="font-semibold text-lg mt-4">Reset Email Sent</h1>
+                <p className="text-gray-500 text-ms mt-2">We have sent an email with a password reset link to <span className="text-gray-600 font-semibold">{email}</span></p>
+                <button className="text-sm font-semibold bg-secondary rounded-md p-2 w-[140px] text-white self-center mt-4" onClick={closeModal}>
+                    Got it
+                </button>
+                <p className="font-semibold text-sm mt-2 text-gray-400">Send Again</p>
+            </ConfirmationModal>
             {/* The actual page itself */}
             <div className="mb-12">
                 {/* Header */}

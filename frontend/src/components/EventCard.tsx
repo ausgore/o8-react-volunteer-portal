@@ -23,16 +23,7 @@ export default function EventCard(props: EventCardProps) {
             setVolunteers(response.data.length);
         })();
     }, []);
-    // useEffect(() => {
-    //     (async () => {
-    //         const response = await CRM("ActivityContact", "get", {
-    //             select: ["id"],
-    //             where: [["activity_id", "=", props.event.id]]
-    //         });
-    //         setVolunteers(response.data.length);
-    //     })();
-    // }, []);
-
+    
     const navigate = useNavigate();
 
     return <div className={props.className}>
@@ -55,7 +46,7 @@ export default function EventCard(props: EventCardProps) {
                     <span className="text-sm font-semibold">{volunteers}{props.event["event_details.vacancy"] ? ` out of ${props.event["event_details.vacancy"]} people` : " have joined"}</span>
                 </div>
                 {/* Read More */}
-                <button className="text-white bg-secondary text-center w-full rounded-md text-sm mt-6 p-1" onClick={() => navigate(`/events/${props.event.id}`)}>
+                <button className="text-white bg-secondary text-center w-full rounded-md text-sm mt-6 py-2 px-1" onClick={() => navigate(`/events/${props.event.id}`)}>
                     Read More
                 </button>
             </div>
