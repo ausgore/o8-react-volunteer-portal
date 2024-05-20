@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import Wrapper from "../components/Wrapper";
 import CRM from "../../crm";
 import EventCard from "../components/EventCard";
-
-// The specific volunteer event activity type name to get
-const eventActivityTypeName = "volunteer event";
-// The custom field set name that is used under the volunteer event activity type
-const customFieldSetName = "event_details";
+import config from "../config";
 
 export default function Events() {
     const [events, setEvents] = useState<[] | null>();
@@ -17,13 +13,13 @@ export default function Events() {
             const response = await CRM("Activity", "get", {
                 select: [
                     "activity_type_id:name",
-                    `${customFieldSetName}.*`,
+                    `${config.EventCustomFieldSetName}.*`,
                     "subject",
                     "location",
                     "activity_date_time",
                     "duration"
                 ],
-                where: [["activity_type_id:name", "=", eventActivityTypeName]],
+                where: [["activity_type_id:name", "=", config.EventActivityTypeName]],
             });
             setEvents(response.data);
         })();
