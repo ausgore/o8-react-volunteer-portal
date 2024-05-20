@@ -8,22 +8,12 @@ import { GrLocation } from "react-icons/gr";
 import { FiCalendar } from "react-icons/fi";
 import moment from "moment";
 import { CustomField } from "../typings/types";
-
-// The specific volunteer event activity type name to get
-const eventActivityTypeName = "volunteer event";
-// The custom field set name that is used under the volunteer event activity type
-const eventDetailsSetName = "event_details";
-// Mandatory custom fields
-const mandatoryCustomFieldNames = ["registration_start", "registration_end", "vacancy"];
-// The custom field set name that is used under the participation activity type
-const participationDetailsSetName = 'participation_details';
-// The name of the activity type
-const participationActivityType = 'Volunteer Event Participation';
+import config from "../config";
 
 export default function Event() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const email = (window as any).email as string ?? "casuarina@octopus8.com";
+    const email = (window as any).email as string ?? config.email;
 
     const [event, setEvent] = useState<any>();
     const [volunteers, setVolunteers] = useState<any[]>([]);
@@ -36,7 +26,7 @@ export default function Event() {
             let response = await CRM("Activity", "get", {
                 select: [
                     "activity_type_id:name",
-                    `${eventDetailsSetName}.*`,
+                    `${config.EventCustomFieldSetName}.*`,
                     "subject",
                     "details",
                     "location",
@@ -45,7 +35,7 @@ export default function Event() {
                 ],
                 where: [
                     ["id", "=", id],
-                    ["activity_type_id:name", "=", eventActivityTypeName]
+                    ["activity_type_id:name", "=", config.EventActivityTypeName]
                 ]
             });
 
@@ -56,13 +46,13 @@ export default function Event() {
             // Custom fields to be set in state
             response = await CRM("CustomField", "get", {
                 select: ["name", "label"],
-                where: [["custom_group_id:name", "=", eventDetailsSetName]]
+                where: [["custom_group_id:name", "=", config.EventCustomFieldSetName]]
             });
 
             const customFields: any = {};
             for (const field of response.data) {
-                if (!mandatoryCustomFieldNames.includes(field.name) && event[`${eventDetailsSetName}.${field.name}`]?.length > 0) {
-                    customFields[`${eventDetailsSetName}.${field.name}`] = {
+                if (!config.MandatoryEventCustomFields.includes(field.name) && event[`${config.EventCustomFieldSetName}.${field.name}`]?.length > 0) {
+                    customFields[`${config.EventCustomFieldSetName}.${field.name}`] = {
                         label: field.label,
                         name: field.name
                     }
@@ -79,7 +69,7 @@ export default function Event() {
     const updateVolunteers = async () => {
         const response = await CRM("ActivityContact", "get", {
             select: ["contact_id.email_primary.email"],
-            where: [[`activity_id.${participationDetailsSetName}.event_activity_id`, "=", id]]
+            where: [[`activity_id.${config.RegistrationCustomFieldSetName}.event_activity_id`, "=", id]]
         });
         setVolunteers(response.data);
     }
@@ -98,10 +88,10 @@ export default function Event() {
         // Creating the Participation Activity
         response = await CRM("Activity", "create", {
             values: [
-                ["activity_type_id:name", participationActivityType],
+                ["activity_type_id:name", config.RegistrationActivityTypeName],
                 ["source_contact_id", id],
                 ["subject", event.subject],
-                [`${participationDetailsSetName}.event_activity_id`, event.id]
+                [`${config.RegistrationCustomFieldSetName}.event_activity_id`, event.id]
             ]
         });
 
@@ -109,6 +99,8 @@ export default function Event() {
         alert(`You have volunteered for ${event.subject}`);
         setIsVolunteering(false);
     }
+
+    import.meta.env.TEST;
 
     return <Wrapper>
         {!event ? <>
@@ -124,10 +116,10 @@ export default function Event() {
                     <div className="text-center max-w-[180px]">
                         {/* Sign up */}
                         {/* Can't sign up if they already volunteered OR if they are no longer within the registratino date */}
-                        {volunteers.map(v => v["contact_id.email_primary.email"]).includes(email) || !(Date.now() >= new Date(event[`${eventDetailsSetName}.registration_start`]).getTime() && Date.now() <= new Date(event[`${eventDetailsSetName}.registration_end`]).getTime()) || (event[`${eventDetailsSetName}.vacancy`] && volunteers.length >= event[`${eventDetailsSetName}.vacancy`]) ? <>
+                        {volunteers.map(v => v["contact_id.email_primary.email"]).includes(email) || !(Date.now() >= new Date(event[`${config.EventCustomFieldSetName}.registration_start`]).getTime() && Date.now() <= new Date(event[`${config.EventCustomFieldSetName}.registration_end`]).getTime()) || (event[`${config.EventCustomFieldSetName}.vacancy`] && volunteers.length >= event[`${config.EventCustomFieldSetName}.vacancy`]) ? <>
                             {/* Disabled */}
                             <button className="text-white font-semibold bg-primary rounded-md w-full py-[6px] px-2 mb-2 cursor-not-allowed" disabled={true}>
-                                {volunteers.map(v => v["contact_id.email_primary.email"]).includes(email) ? "Volunteered" : "Closed"}
+                                {volunteers.map(v => v["contact_id.email_primary.email"]).includes(email) ? "Registered" : "Closed"}
                             </button>
                         </> : <>
                             {/* Enabled */}
@@ -136,7 +128,7 @@ export default function Event() {
                             </button>
                         </>}
                         {/* Registration deadline */}
-                        <p className="text-xs">Registration: {moment(event[`${eventDetailsSetName}.registration_start`]).format("DD MMMM")} - {moment(event[`${eventDetailsSetName}.registration_end`]).format("DD MMMM")}</p>
+                        <p className="text-xs">Registration: {moment(event[`${config.EventCustomFieldSetName}.registration_start`]).format("DD MMMM")} - {moment(event[`${config.EventCustomFieldSetName}.registration_end`]).format("DD MMMM")}</p>
                     </div>
                 </div>
                 {/* Informations */}
@@ -175,7 +167,7 @@ export default function Event() {
                     {customFields && Object.values(customFields).map(field => {
                         return <div className="mb-6">
                             <h1 className="font-bold mb-2 text-black/70">{field.label}</h1>
-                            <p className="text-black/70">{event[`${eventDetailsSetName}.${field.name}`]}</p>
+                            <p className="text-black/70">{event[`${config.EventCustomFieldSetName}.${field.name}`]}</p>
                         </div>
                     })}
                 </div>

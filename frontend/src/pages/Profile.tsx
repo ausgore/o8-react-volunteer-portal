@@ -9,8 +9,7 @@ import { FiEdit } from "react-icons/fi";
 import { MdSaveAlt, MdOutlineLockReset } from "react-icons/md";
 import { CustomField, FieldOptions } from "../typings/types";
 import ConfirmationModal from "../components/ConfirmationModal";
-
-const customFieldSetName = "example";
+import config from "../config";
 
 export default function SecondProfile() {
     const [isEditing, setIsEditing] = useState(false);
@@ -19,9 +18,7 @@ export default function SecondProfile() {
     const [name, setName] = useState("");
     const [customFields, setCustomFields] = useState<{ [key: string]: CustomField }>();
 
-    // Currently hardcoded email variable to casuarina@octopus.8com
-    // Remember to change it to be window.email from <scritp> in index.html
-    const email = (window as any).email ?? "casuarina@octopus8.com";
+    const email = (window as any).email ?? config.email;
 
     const handleProfile = (id: string, value: any) => {
         const newProfile = { ...profile };
@@ -41,6 +38,7 @@ export default function SecondProfile() {
 
     // Initializing pre-data
     useEffect(() => {
+        console.log(import.meta.env.TEST);
         // Fetching default and custom field sets
         (async function () {
             // Fetching default fields
@@ -53,7 +51,7 @@ export default function SecondProfile() {
                     "gender_id",
                     "first_name",
                     "last_name",
-                    `${customFieldSetName}.*`
+                    `${config.ProfileCustomFieldSetName}.*`
                 ],
                 where: [["email_primary.email", "=", email]]
             });
@@ -66,7 +64,7 @@ export default function SecondProfile() {
             // Fetching custom fields
             response = await CRM("CustomField", "get", {
                 select: ["name", "label", "html_type", "option_group_id", "data_type"],
-                where: [["custom_group_id:name", "=", customFieldSetName]]
+                where: [["custom_group_id:name", "=", config.ProfileCustomFieldSetName]]
             });
             // Getting the option group IDs to fetch field vlaues
             const optionGroupIds = response.data.map((field: any) => field.option_group_id).filter((id: any) => id);
@@ -79,7 +77,7 @@ export default function SecondProfile() {
             // Custom fields to be set in state
             const customFields: any = {};
             for (const field of response.data) {
-                customFields[`${customFieldSetName}.${field.name}`] = {
+                customFields[`${config.ProfileCustomFieldSetName}.${field.name}`] = {
                     label: field.label,
                     name: field.name,
                     htmlType: field.html_type,
@@ -198,7 +196,7 @@ export default function SecondProfile() {
 
                             {/* Custom  fields */}
                             {customFields && Object.values(customFields).map((field: CustomField) => {
-                                const id = `${customFieldSetName}.${field.name}`
+                                const id = `${config.ProfileCustomFieldSetName}.${field.name}`
                                 switch (field.htmlType) {
                                     case "Text":
                                         return <TextField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} />
