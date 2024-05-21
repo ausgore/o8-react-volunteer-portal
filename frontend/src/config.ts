@@ -1,9 +1,9 @@
 interface ConfigProps {
+    domain: string;
     email: string;
     ProfileCustomFieldSetName: string;
     EventActivityTypeName: string;
     EventCustomFieldSetName: string;
-    MandatoryEventCustomFields: string[];
     RegistrationActivityTypeName: string;
     RegistrationCustomFieldSetName: string;
     LoggingAttendanceActivityTypeName: string;
@@ -11,6 +11,8 @@ interface ConfigProps {
 }
 
 const config: ConfigProps = {
+    // Domain
+    domain: "http://localhost/wordpress",
     // Test email
     email: "munjun@octopus8.com",
     // The custom field set used for the profile
@@ -20,8 +22,6 @@ const config: ConfigProps = {
     EventActivityTypeName: "Volunteer Event",
     // The custom field set used for the event
     EventCustomFieldSetName: "event_details",
-    // MAndatory custom field names that must exist, DO NOT CHANGE HERE
-    MandatoryEventCustomFields: ["registration_start", "registration_end", "vacancy"],
 
     // The activity type name for registering for an event
     RegistrationActivityTypeName: "Volunteer Event Registration",

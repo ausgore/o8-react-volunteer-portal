@@ -10,12 +10,15 @@ import moment from "moment";
 import { CustomField } from "../typings/types";
 import config from "../config";
 
+const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail"]
+
 export default function Event() {
     const { id } = useParams();
     const navigate = useNavigate();
     const email = (window as any).email as string ?? config.email;
 
     const [event, setEvent] = useState<any>();
+    const [thumbnail, setThumbnail] = useState<any>();
     const [volunteers, setVolunteers] = useState<any[]>([]);
     const [isVolunteering, setIsVolunteering] = useState(false);
     const [customFields, setCustomFields] = useState<{ [key: string]: CustomField }>();
@@ -41,7 +44,16 @@ export default function Event() {
 
             const [event] = response.data;
             if (!event) return navigate("/events");
-            event.details = sanitizeHtml(event.details)
+            event.details = sanitizeHtml(event.details);
+
+            // Getting thumbanil
+            if (event["event_details.thumbnail"]) {
+                response = await CRM("File", "get", { 
+                    select: ["uri"],
+                    where: [["id", "=", event[`${config.EventCustomFieldSetName}.thumbnail`]]] 
+                });
+                if (response.data[0]) setThumbnail(`${config.domain}/wp-content/uploads/civicrm/custom/${response.data[0].uri}`);
+            }
 
             // Custom fields to be set in state
             response = await CRM("CustomField", "get", {
@@ -51,7 +63,7 @@ export default function Event() {
 
             const customFields: any = {};
             for (const field of response.data) {
-                if (!config.MandatoryEventCustomFields.includes(field.name) && event[`${config.EventCustomFieldSetName}.${field.name}`]?.length > 0) {
+                if (!presetCustomFields.includes(field.name) && event[`${config.EventCustomFieldSetName}.${field.name}`]?.length > 0) {
                     customFields[`${config.EventCustomFieldSetName}.${field.name}`] = {
                         label: field.label,
                         name: field.name
@@ -64,6 +76,8 @@ export default function Event() {
             setEvent(event);
         })();
     }, [id]);
+
+    useEffect(() => console.log(thumbnail), [thumbnail]);
 
     // Getting volunteers for this event
     const updateVolunteers = async () => {
@@ -108,13 +122,19 @@ export default function Event() {
         </> : <div className="p-4">
             <h1>Event Details</h1>
             <div className="bg-white rounded-md mt-4 py-6 px-4 max-w-[1200px]">
-                <div className="flex flex-row justify-between w-full gap-x-4">
-                    <header className="flex-grow">
+                {/* Image */}
+                <div className="mb-4 h-[170px] rounded-lg">
+                    <img src={thumbnail} className="object-contain w-full h-full rounded-lg" />
+                </div>
+                {/* Header, subject etc  */}
+                <header className="flex flex-row justify-between w-full gap-x-4">
+                    {/* Subject description */}
+                    <div className="flex-grow">
                         <h2 className="text-2xl text-secondary font-bold">{event.subject}</h2>
                         {event.details?.length > 0 && <div className="max-w-[800px] mt-6 text-black/70" dangerouslySetInnerHTML={{ __html: event.details }} />}
-                    </header>
+                    </div>
+                    {/* Sign up */}
                     <div className="text-center max-w-[180px]">
-                        {/* Sign up */}
                         {/* Can't sign up if they already volunteered OR if they are no longer within the registratino date */}
                         {volunteers.map(v => v["contact_id.email_primary.email"]).includes(email) || !(Date.now() >= new Date(event[`${config.EventCustomFieldSetName}.registration_start`]).getTime() && Date.now() <= new Date(event[`${config.EventCustomFieldSetName}.registration_end`]).getTime()) || (event[`${config.EventCustomFieldSetName}.vacancy`] && volunteers.length >= event[`${config.EventCustomFieldSetName}.vacancy`]) ? <>
                             {/* Disabled */}
@@ -130,7 +150,7 @@ export default function Event() {
                         {/* Registration deadline */}
                         <p className="text-xs">Registration: {moment(event[`${config.EventCustomFieldSetName}.registration_start`]).format("DD MMMM")} - {moment(event[`${config.EventCustomFieldSetName}.registration_end`]).format("DD MMMM")}</p>
                     </div>
-                </div>
+                </header>
                 {/* Informations */}
                 <div className="grid grid-cols-2 lg:flex lg:flex-row gap-3 w-full mt-6 max-w-[800px]">
                     {/* People attending */}
