@@ -8,7 +8,7 @@ import { GrLocation } from "react-icons/gr";
 import { FiCalendar } from "react-icons/fi";
 import moment from "moment";
 import { CustomField } from "../typings/types";
-import config from "../config";
+import config from "../../config";
 import { CiFileOff } from "react-icons/ci";
 
 const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail"]

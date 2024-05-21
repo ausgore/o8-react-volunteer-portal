@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Wrapper from "../components/Wrapper";
 import CRM from "../../crm";
 import EventCard from "../components/EventCard";
-import config from "../config";
+import config from "../../config";
 
 export default function Events() {
     const [events, setEvents] = useState<[] | null>();
