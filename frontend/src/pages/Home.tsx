@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import CRM from "../../crm";
 import Wrapper from "../components/Wrapper";
-import axios from "axios";
+import config from "../config";
+import { format } from "date-fns";
 
 // Define the type for volunteered activity details
 interface VolunteerActivityDetails {
@@ -19,112 +19,189 @@ interface VolunteerActivityDetails {
     Max_Volunteers: string;
 }
 
-const custom_group_participation_details = 'participation_details';
-const activity_type_event_participation = 'Volunteer Event Participation';
+// Function to fetch event details
+async function fetchEventDetails(eventId: string) {
+    const eventDetail = await CRM('Activity', 'get', {
+        select: [
+            'subject',
+            'location',
+            'activity_date_time',
+            'duration',
+        ],
+        where: [
+            ['id', '=', eventId]
+        ],
+    });
+    return eventDetail.data[0];
+}
 
-const custom_group_event_details = 'event_details';
+// Function to fetch event attendance
+async function fetchEventAttendance(eventId: string) {
+    const eventAttendance = await CRM('Activity', 'get', {
+        select: [
+            config.LoggingAttendanceCustomFieldSetName + '.event_activity_id',
+            'duration',
+        ],
+        where: [
+            [config.LoggingAttendanceCustomFieldSetName + '.event_activity_id', '=', eventId]
+        ],
+    });
+    return eventAttendance.data[0];
+}
+
+// Fetch all unvolunteered & future events
+async function getAllEvents(volunteeredActivitiesArr: number[]) {
+    const now = new Date();
+    const formattedNow = format(now, "yyyy-MM-dd HH:mm:ss");
+    const allEvents = await CRM("Activity", "get", {
+        select: [
+            "subject",
+            "location",
+            "activity_date_time",
+        ],
+        where: [
+            ["activity_type_id:name", "=", config.EventActivityTypeName],
+            ['activity_date_time', '>', formattedNow],
+            ['id', 'NOT IN', volunteeredActivitiesArr],
+        ],
+        order: [
+            ['activity_date_time', 'ASC']
+        ],
+        limit: 3,
+    });
+
+    // console.log(allEvents.data);
+    return allEvents.data;
+}
 
 export default function Home() {
-    const [volunteeredActivities, setVolunteeredActivities] = useState<any[]>([]);
     const [volunteeredActivitiesDetails, setVolunteeredActivitiesDetails] = useState<VolunteerActivityDetails[]>([]);
     const [hoursVolunteered, setHoursVolunteered] = useState<number>(0);
     const [numEventsParticipated, setNumEventsParticipated] = useState<number>(0);
+    const [upcomingUnvolunteeredEvents, setUpcomingUnvolunteeredEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const win = window as any;
-        const email = win.email ?? "casuarina@octopus8.com";
+        const email = (window as any).email as string ?? config.email;
 
         (async function () {
-            const response1 = await CRM('Activity', 'get', {
-                select: [
-                    'status_id:name',
-                    // custom_group_participation_details + '.*',
-                    custom_group_participation_details + '.recorded_start',
-                    custom_group_participation_details + '.recorded_end',
-                    custom_group_participation_details + '.event_activity_id',
-                ],
-                join: [
-                    ['ActivityContact AS activity_contact', 'LEFT', ['id', '=', 'activity_contact.activity_id']],
-                ],
-                where: [
-                    ['activity_contact.contact_id.email_primary.email', '=', email],
-                    ['activity_type_id:label', '=', activity_type_event_participation],
-                ],
-                order: [
-                    ['id', 'ASC']
-                ],
-                limit: 0,
-            });
-            console.log(response1.data);
-
-            setVolunteeredActivities(response1.data);
-
-            // Create an array to hold promises for fetching details
-            const detailPromises = response1.data.map(async (activity: any) => {
-                const response2 = await CRM('Activity', 'get', {
+            try {
+                const allEventRegistration = await CRM('Activity', 'get', {
                     select: [
-                        'subject',
-                        // 'details',
-                        'location',
-                        'activity_date_time',
-                        // 'duration',
-                        // custom_group_event_details + '.*',
+                        'status_id:name',
+                        config.RegistrationCustomFieldSetName + '.event_activity_id',
+                    ],
+                    join: [
+                        ['ActivityContact AS activity_contact', 'LEFT', ['id', '=', 'activity_contact.activity_id']],
                     ],
                     where: [
-                        ['id', '=', activity[custom_group_participation_details + '.event_activity_id']]
+                        ['activity_contact.contact_id.email_primary.email', '=', email],
+                        ['activity_type_id:label', '=', config.RegistrationActivityTypeName],
                     ],
                     order: [
-                        ["id", "ASC"]
+                        ['id', 'ASC']
                     ],
-                    limit: 0,
                 });
-                console.log(response2.data[0]);
 
-                return { status: activity, details: response2.data[0] };
-                // return response2.data;
-            });
+                const unifiedPromises = allEventRegistration.data.map(async (activity: any) => {
+                    const eventId = activity[config.RegistrationCustomFieldSetName + '.event_activity_id'];
+                    const [eventDetail, eventAttendance] = await Promise.all([
+                        fetchEventDetails(eventId),
+                        fetchEventAttendance(eventId),
+                    ]);
 
-            // Wait for all detail promises to resolve
-            const allDetails = await Promise.all(detailPromises);
-            console.log(allDetails);
-            // const flattenedAllDetails = allDetails.flatMap(innerArray => innerArray);
+                    return { status: activity, details: eventDetail, attendance: eventAttendance };
+                });
+
+                // Wait for all detail promises to resolve
+                const allDetails = await Promise.all(unifiedPromises);
+                // console.log(allDetails);
+                // const flattenedAllDetails = allDetails.flatMap(innerArray => innerArray);
 
 
-            let hoursVolunteeredCalc = 0;
-            let numEventsParticipatedCalc = 0;
+                let minsVolunteeredCalc = 0;
+                let numEventsParticipatedCalc = 0;
 
-            // Calculate hours and events participated
-            allDetails.forEach(({ status, details }: any) => {
-                if (status['status_id:name'] === 'Completed') {
-                    let start = new Date(status[custom_group_participation_details + '.recorded_start']);
-                    let end = new Date(status[custom_group_participation_details + '.recorded_end']);
-                    let timeDifference = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-                    hoursVolunteeredCalc += parseFloat(timeDifference.toFixed(1));
+                // Calculate minutes and events participated
+                allDetails.forEach(({ status, details, attendance }: any) => {
+                    let eventStatus = "Upcoming";
+                    const eventDate = new Date(details['activity_date_time']);
+                    const now = new Date();
 
-                    numEventsParticipatedCalc++;
-                }
-            });
+                    if (status['status_id:name'] === 'Cancelled') {
+                        eventStatus = "Cancelled";
+                    } else if (now < eventDate) {
+                        eventStatus = "Upcoming";
+                    } else {
+                        if (!attendance) {
+                            eventStatus = "No Show";
+                        } else {
+                            eventStatus = "Completed";
+                            minsVolunteeredCalc += attendance['duration'] ?? details['duration'];
+                            numEventsParticipatedCalc++;
+                        }
+                    }
 
-            setVolunteeredActivitiesDetails(allDetails);
-            setHoursVolunteered(hoursVolunteeredCalc);
-            setNumEventsParticipated(numEventsParticipatedCalc);
+                    status['status_id:name'] = eventStatus;
+                });
+
+                let hoursVolunteered = parseFloat((minsVolunteeredCalc / 60).toFixed(1));
+
+                setVolunteeredActivitiesDetails(allDetails);
+                setHoursVolunteered(hoursVolunteered);
+                setNumEventsParticipated(numEventsParticipatedCalc);
+
+                // Extract IDs of volunteered activities
+                const volunteeredActivitiesArr = allDetails.map((detail: any) => detail.details.id);
+
+                // Fetch all unvolunteered & future events
+                const allEvents = await getAllEvents(volunteeredActivitiesArr);
+
+                // Filter upcoming unvolunteered events
+                // const registeredEventIds = new Set(allDetails.map((detail: any) => detail.details.id));
+                // const upcomingUnvolunteered = allEvents.filter((event: any) => {
+                //     const eventDate = new Date(event['activity_date_time']);
+                //     const now = new Date();
+                //     return now < eventDate && !registeredEventIds.has(event.id);
+                // });
+
+                setUpcomingUnvolunteeredEvents(allEvents);
+            } catch (error) {
+                console.log('Error fetching data: ', error)
+            } finally {
+                setLoading(false);
+            }
         })();
-    }, [])
+    }, []);
 
     return <Wrapper>
-        {/* <h1>Home Page</h1>
-        <Link to="/profile">Go to profile page</Link> */}
-        <h1><b>Volunteered Activities</b></h1>
-        Number of Hours Volunteered: {hoursVolunteered}<br />
-        Volunteering Events Participated: {numEventsParticipated}<br /><br />
-        {volunteeredActivitiesDetails.map(({ status, details }: any, index) => (
-            <div key={index}>
-                <h2>Event Name: {details['subject']}</h2>
-                <h3>Date, Time: {details['activity_date_time']}</h3>
-                <h3>Status: {status['status_id:name']}</h3>
-                <h3>Location: {details['location']}</h3>
-                <br/>
+        {loading ? (
+            <h1><b>Loading...</b></h1>
+        ) : (
+            <div>
+                Number of Hours Volunteered: {hoursVolunteered}<br />
+                Volunteering Events Participated: {numEventsParticipated}<br /><br />
+                <h1><b>Volunteering Event Status</b></h1>
+                {volunteeredActivitiesDetails.map(({ status, details }: any, index) => (
+                    <div key={index}>
+                        <h2>Event Name: {details['subject']}</h2>
+                        <h3>Date, Time: {details['activity_date_time']}</h3>
+                        <h3>Status: {status['status_id:name']}</h3>
+                        <h3>Location: {details['location']}</h3>
+                        <h3>Duration: {details['duration']}</h3>
+                        <br />
+                    </div>
+                ))}<br />
+                <h1><b>Upcoming Events</b></h1>
+                {upcomingUnvolunteeredEvents.map((event: any, index: number) => (
+                    <div key={index}>
+                        <h2>Event Name: {event['subject']}</h2>
+                        <h3>Date, Time: {event['activity_date_time']}</h3>
+                        <h3>Location: {event['location']}</h3>
+                        <br />
+                    </div>
+                ))}
             </div>
-        ))}
+        )}
     </Wrapper>
 }
