@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import CRM from "../../crm";
 import Wrapper from "../components/Wrapper";
-import config from "../config";
+import config from "../../../config";
 import { format } from "date-fns";
 
 // Define the type for volunteered activity details
-interface VolunteerActivityDetails {
-    Title: string;
-    Tagline: string;
-    Description: string;
-    Responsibilities: string;
-    Requirements: string;
-    Location: string;
-    Event_Start_Date: string;
-    Event_End_Date: string;
-    Registration_Start_Date: string;
-    Registration_End_Date: string;
-    Max_Volunteers: string;
-}
+// interface VolunteerActivityDetails {
+//     Title: string;
+//     Tagline: string;
+//     Description: string;
+//     Responsibilities: string;
+//     Requirements: string;
+//     Location: string;
+//     Event_Start_Date: string;
+//     Event_End_Date: string;
+//     Registration_Start_Date: string;
+//     Registration_End_Date: string;
+//     Max_Volunteers: string;
+// }
 
 // Function to fetch event details
 async function fetchEventDetails(eventId: string) {
@@ -29,7 +29,7 @@ async function fetchEventDetails(eventId: string) {
             'duration',
         ],
         where: [
-            ['id', '=', eventId]
+            ['id', '=', eventId],
         ],
     });
     return eventDetail.data[0];
@@ -43,7 +43,7 @@ async function fetchEventAttendance(eventId: string) {
             'duration',
         ],
         where: [
-            [config.LoggingAttendanceCustomFieldSetName + '.event_activity_id', '=', eventId]
+            [config.LoggingAttendanceCustomFieldSetName + '.event_activity_id', '=', eventId],
         ],
     });
     return eventAttendance.data[0];
@@ -65,7 +65,7 @@ async function getAllEvents(volunteeredActivitiesArr: number[]) {
             ['id', 'NOT IN', volunteeredActivitiesArr],
         ],
         order: [
-            ['activity_date_time', 'ASC']
+            ['activity_date_time', 'ASC'],
         ],
         limit: 3,
     });
@@ -74,8 +74,21 @@ async function getAllEvents(volunteeredActivitiesArr: number[]) {
     return allEvents.data;
 }
 
+async function cancelEvent(registrationActivityId: number) {
+    const cancel = await CRM("Activity", 'update', {
+        values: [
+            ['status_id:name', 'Cancelled'],
+        ],
+        where: [
+            ['id', '=', registrationActivityId],
+        ]
+    });
+
+    return cancel.data.length > 0
+}
+
 export default function Home() {
-    const [volunteeredActivitiesDetails, setVolunteeredActivitiesDetails] = useState<VolunteerActivityDetails[]>([]);
+    const [volunteeredEvents, setVolunteeredEvents] = useState<any[]>([]);
     const [hoursVolunteered, setHoursVolunteered] = useState<number>(0);
     const [numEventsParticipated, setNumEventsParticipated] = useState<number>(0);
     const [upcomingUnvolunteeredEvents, setUpcomingUnvolunteeredEvents] = useState([]);
@@ -115,7 +128,7 @@ export default function Home() {
 
                 // Wait for all detail promises to resolve
                 const allDetails = await Promise.all(unifiedPromises);
-                // console.log(allDetails);
+                console.log(allDetails);
                 // const flattenedAllDetails = allDetails.flatMap(innerArray => innerArray);
 
 
@@ -124,7 +137,7 @@ export default function Home() {
 
                 // Calculate minutes and events participated
                 allDetails.forEach(({ status, details, attendance }: any) => {
-                    let eventStatus = "Upcoming";
+                    let eventStatus = "";
                     const eventDate = new Date(details['activity_date_time']);
                     const now = new Date();
 
@@ -147,7 +160,7 @@ export default function Home() {
 
                 let hoursVolunteered = parseFloat((minsVolunteeredCalc / 60).toFixed(1));
 
-                setVolunteeredActivitiesDetails(allDetails);
+                setVolunteeredEvents(allDetails);
                 setHoursVolunteered(hoursVolunteered);
                 setNumEventsParticipated(numEventsParticipatedCalc);
 
@@ -182,13 +195,49 @@ export default function Home() {
                 Number of Hours Volunteered: {hoursVolunteered}<br />
                 Volunteering Events Participated: {numEventsParticipated}<br /><br />
                 <h1><b>Volunteering Event Status</b></h1>
-                {volunteeredActivitiesDetails.map(({ status, details }: any, index) => (
+                {volunteeredEvents.map(({ status, details }: any, index) => (
                     <div key={index}>
                         <h2>Event Name: {details['subject']}</h2>
                         <h3>Date, Time: {details['activity_date_time']}</h3>
                         <h3>Status: {status['status_id:name']}</h3>
                         <h3>Location: {details['location']}</h3>
                         <h3>Duration: {details['duration']}</h3>
+                        <button
+                            type="button"
+                            style={{
+                                padding: "4px 20px",
+                                backgroundColor: "#007bff",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer"
+                            }}
+                            onClick={async () => {
+                                // cancel registration allowed only for upcoming/no show 
+                                if (status['status_id:name'] === "Upcoming" || status['status_id:name'] === "No Show") {
+                                    if (window.confirm("Are you sure you want to cancel this event?")) {
+                                        const result = await cancelEvent(status['id']);
+                                        if (result) {
+                                            alert("Event has been cancelled");
+                                            setVolunteeredEvents((prevEvents) =>
+                                                prevEvents.map((event) =>
+                                                    event.status.id === status['id']
+                                                        ? { ...event, status: { ...event.status, 'status_id:name': "Cancelled" } }
+                                                        // everything in event remain same (...event), but update status
+                                                        // everything in event.status remain same (...event.status), but update status.id:name
+                                                        : event
+                                                )
+                                            );
+                                        }
+                                    }
+                                }
+                                else if (status['status_id:name'] === "Cancelled" || status['status_id:name'] === "Completed") {
+                                    alert("Sorry you cannot cancel this event");
+                                }
+                            }}>
+                            Cancel
+                        </button>
+                        <br />
                         <br />
                     </div>
                 ))}<br />
