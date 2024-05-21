@@ -7,6 +7,7 @@ import { LuCalendarRange } from "react-icons/lu";
 import axios from "axios";
 import { useState } from "react";
 import ConfirmationModal from "../ConfirmationModal";
+import SignOut from "../../assets/SignOut.png";
 
 export default function Navbar() {
     const [isSigningOut, setIsSigningOut] = useState(false);
@@ -31,11 +32,12 @@ export default function Navbar() {
 
 
     return <>
-        <ConfirmationModal showModal={showModal} closeModal={closeModal}>
-            <h1>Hello World</h1>
-            <button className="text-sm font-semibold bg-secondary disabled:bg-primary rounded-md p-2 w-[140px] text-white self-center mt-4" onClick={signOut} disabled={isSigningOut}>
+        <ConfirmationModal showModal={showModal} closeModal={closeModal} image={SignOut} imageWidth="max-w-[260px]" imageHeight="h-[160px]">
+            <h1 className="font-semibold text-[16px] mt-4 text-gray-400">Are you sure you want to sign out?</h1>
+            <button className="text-sm font-semibold bg-secondary disabled:bg-primary rounded-md p-2 w-[180px] text-white self-center mt-4" onClick={signOut} disabled={isSigningOut}>
                 {isSigningOut ? "Signing Out..." : "Sign Out"}
             </button>
+            <p className="font-semibold mt-3 text-gray-400 cursor-pointer" onClick={closeModal}>Cancel</p>
         </ConfirmationModal>
         <nav className="h-full w-56 fixed bg-white flex flex-col">
             {/* Responsible for the image */}
