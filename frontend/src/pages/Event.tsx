@@ -9,6 +9,7 @@ import { FiCalendar } from "react-icons/fi";
 import moment from "moment";
 import { CustomField } from "../typings/types";
 import config from "../config";
+import { CiFileOff } from "react-icons/ci";
 
 const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail"]
 
@@ -47,7 +48,7 @@ export default function Event() {
             event.details = sanitizeHtml(event.details);
 
             // Getting thumbanil
-            if (event["event_details.thumbnail"]) {
+            if (event[`${config.EventCustomFieldSetName}.thumbnail`]) {
                 response = await CRM("File", "get", { 
                     select: ["uri"],
                     where: [["id", "=", event[`${config.EventCustomFieldSetName}.thumbnail`]]] 
@@ -76,8 +77,6 @@ export default function Event() {
             setEvent(event);
         })();
     }, [id]);
-
-    useEffect(() => console.log(thumbnail), [thumbnail]);
 
     // Getting volunteers for this event
     const updateVolunteers = async () => {
@@ -114,8 +113,6 @@ export default function Event() {
         setIsVolunteering(false);
     }
 
-    import.meta.env.TEST;
-
     return <Wrapper>
         {!event ? <>
             <h1>Loading Event...</h1>
@@ -123,15 +120,18 @@ export default function Event() {
             <h1>Event Details</h1>
             <div className="bg-white rounded-md mt-4 py-6 px-4 max-w-[1200px]">
                 {/* Image */}
-                <div className="mb-4 h-[170px] rounded-lg">
-                    <img src={thumbnail} className="object-contain w-full h-full rounded-lg" />
+                <div className="mb-8 h-[200px] rounded-lg relative bg-gray-200">
+                    {thumbnail && <img src={thumbnail} className="w-full h-full object-cover rounded-lg" />}
+                    {!thumbnail && <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <CiFileOff className="text-[80px] text-gray-500" />
+                    </div>}
                 </div>
                 {/* Header, subject etc  */}
                 <header className="flex flex-row justify-between w-full gap-x-4">
                     {/* Subject description */}
                     <div className="flex-grow">
                         <h2 className="text-2xl text-secondary font-bold">{event.subject}</h2>
-                        {event.details?.length > 0 && <div className="max-w-[800px] mt-6 text-black/70" dangerouslySetInnerHTML={{ __html: event.details }} />}
+                        {event.details?.length > 0 && <div className="max-w-[780px] mt-4 text-black/70" dangerouslySetInnerHTML={{ __html: event.details }} />}
                     </div>
                     {/* Sign up */}
                     <div className="text-center max-w-[180px]">
