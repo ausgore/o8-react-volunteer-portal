@@ -4,7 +4,7 @@ import { FiCalendar } from "react-icons/fi";
 import { GrGroup, GrLocation } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
 import CRM from "../../crm";
-import config from "../config";
+import config from "../../../config";
 import { CiFileOff } from "react-icons/ci";
 
 interface EventCardProps {

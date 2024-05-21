@@ -9,7 +9,7 @@ import { FiEdit } from "react-icons/fi";
 import { MdSaveAlt, MdOutlineLockReset } from "react-icons/md";
 import { CustomField, FieldOptions } from "../typings/types";
 import ConfirmationModal from "../components/ConfirmationModal";
-import config from "../../config";
+import config from "../../../config";
 
 export default function SecondProfile() {
     const [isEditing, setIsEditing] = useState(false);
@@ -38,7 +38,6 @@ export default function SecondProfile() {
 
     // Initializing pre-data
     useEffect(() => {
-        console.log(import.meta.env.TEST);
         // Fetching default and custom field sets
         (async function () {
             // Fetching default fields

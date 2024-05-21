@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import Wrapper from "../components/Wrapper";
 import CRM from "../../crm";
 import EventCard from "../components/EventCard";
-import config from "../../config";
+import config from "../../../config";
 
 export default function Events() {
     const [events, setEvents] = useState<[] | null>();
+    const [category, setCategory] = useState<any>();
+    const [categories, setCategories] = useState<any[]>();
 
-    // Fetching all events via activity type name, and returning certain default fields and custom fields under specific set name
     useEffect(() => {
         (async () => {
+            // Fetch all events
             const response = await CRM("Activity", "get", {
                 select: [
                     "activity_type_id:name",
