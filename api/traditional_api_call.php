@@ -17,6 +17,7 @@ $join = $query['join'] ?? array();
 $where = $query['where'] ?? array();
 $order = $query['order'] ?? array();
 $values = $query['values'] ?? array();
+$limit = $query['limit'] ?? null;
 
 // Initializing default params value
 $params = array(
@@ -44,6 +45,9 @@ if (is_array($values) && !empty($values)) {
         $valuesArray[$v[0]] = $v[1];
     }
     $params['values'] = $valuesArray;
+}
+if ($limit != null) {
+    $params['limit'] = $limit;
 }
 
 $result = civicrm_api4($entity, $action, $params);
