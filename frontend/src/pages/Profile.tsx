@@ -73,6 +73,8 @@ export default function SecondProfile() {
                 where: [["option_group_id", "IN", optionGroupIds]]
             });
 
+            console.log(optionValueResponse);
+
             // Custom fields to be set in state
             const customFields: any = {};
             for (const field of response.data) {

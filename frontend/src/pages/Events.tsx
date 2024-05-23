@@ -54,7 +54,7 @@ export default function Events() {
         if (search) where.push(["subject", "CONTAINS", search]);
         const categories: number[] = JSON.parse(searchParams.get("categories") ?? "[]");
         console.log(categories);
-        if (categories.length) where.push([`${config.EventCustomFieldSetName}.category`, "IN", searchParams.get("categories")])
+        if (categories.length) where.push([`${config.EventCustomFieldSetName}.category`, "IN", categories])
 
         // Fetch all events
         let response = await CRM("Activity", "get", {
