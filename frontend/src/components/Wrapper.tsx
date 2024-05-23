@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 export default function Wrapper(props: PropsWithChildren) {
     return <>
         <Navbar />
-        <div className="ml-56">
+        <div className="ml-52">
             {props.children}
         </div>
     </>

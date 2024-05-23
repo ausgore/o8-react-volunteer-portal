@@ -27,3 +27,7 @@ body {
     background-color: #f4f5fb;
     font-family: 'Segoe';
 }
+
+input[type=checkbox] {
+    cursor: pointer;
+}

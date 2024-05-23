@@ -68,7 +68,7 @@ export default function EventCard(props: EventCardProps) {
                 </div>
             </div>
             {/* Read More */}
-            <button className="text-white bg-secondary text-center w-full rounded-md text-sm mt-6 py-2 px-1" onClick={() => navigate(`/events/${props.event.id}`)}>
+            <button className="text-white bg-secondary text-center w-full rounded-md text-sm mt-6 py-2" onClick={() => navigate(`/events/${props.event.id}`)}>
                 Read More
             </button>
         </div>
