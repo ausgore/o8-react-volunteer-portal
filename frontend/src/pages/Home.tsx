@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import CRM from "../../crm";
 import Wrapper from "../components/Wrapper";
-import config from "../config";
+import config from "../../../config";
 import { format } from "date-fns";
 
 // Define the type for volunteered activity details
@@ -133,6 +133,7 @@ export default function Home() {
                     } else if (now < eventDate) {
                         eventStatus = "Upcoming";
                     } else {
+                        console.log(attendance, "hi");
                         if (!attendance) {
                             eventStatus = "No Show";
                         } else {

@@ -29,8 +29,21 @@ if (is_array($select) && !empty($select))
     $params['select'] = $select;
 if (is_array($join) && !empty($join))
     $params['join'] = $join;
-if (is_array($where) && !empty($where))
-    $params['where'] = $where;
+if (is_array($where) && !empty($where)) {
+    $whereClause = [];
+    foreach ($where as $condition) {
+        if (count($condition) == 2) array_push($whereClause, $condition);
+        else {
+            $newCondition = array($condition[0], $condition[1]);
+            // If it doesn't start with "[" and end with "]"
+            if (!str_starts_with($condition[2], "[") && !str_ends_with($condition[2], "]")) array_push($newCondition, $condition[2]);
+            else array_push($newCondition, json_decode($condition[2]));
+            array_push($whereClause, $newCondition);
+        }
+
+    }
+    $params['where'] = $whereClause;
+}
 if (is_array($order) && !empty($order)) {
     $orderBy = array();
     // $order = [[id, ASC], [createdAt, ASC]]

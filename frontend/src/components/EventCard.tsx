@@ -42,7 +42,7 @@ export default function EventCard(props: EventCardProps) {
         <div className="bg-white w-full shadow-md rounded-md p-4 transition-transform duration-300 transform hover:scale-105 flex flex-col justify-between">
             <div>
                 {/* Image */}
-                <div className={"mb-4 h-[160px] rounded-lg relative bg-gray-200"}>
+                <div className={"mb-4 h-[160px] rounded-lg relative bg-gray-200 cursor-pointer"} onClick={() => navigate(`/events/${props.event.id}`)}>
                     {thumbnail && <img src={thumbnail} className="w-full h-full object-cover rounded-lg" />}
                     {!thumbnail && <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                         <CiFileOff className="text-[80px] text-gray-500" />
