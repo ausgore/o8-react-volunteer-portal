@@ -10,6 +10,7 @@ import moment from "moment";
 import { CustomField } from "../typings/types";
 import config from "../../../config";
 import { CiFileOff } from "react-icons/ci";
+import Loading from "../components/Loading";
 
 const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail"]
 
@@ -114,9 +115,7 @@ export default function Event() {
     }
 
     return <Wrapper>
-        {!event ? <>
-            <h1>Loading Event...</h1>
-        </> : <div className="p-4">
+        {!event ? <Loading className="h-screen items-center" /> : <div className="p-4">
             <h1>Event Details</h1>
             <div className="bg-white rounded-md mt-4 py-6 px-4 max-w-[1200px]">
                 {/* Image */}

@@ -1,5 +1,5 @@
 <?php
-require_once($_SERVER['DOCUMENT_ROOT'] . '/wordpress/wp-load.php');
+require_once('../../wordpress/wp-load.php');
 
 if (is_user_logged_in()) {
   $user = wp_get_current_user();
@@ -18,8 +18,8 @@ else {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script type="module" crossorigin src="/wordpress/portal/assets/index-DrWrzCUw.js"></script>
-    <link rel="stylesheet" crossorigin href="/wordpress/portal/assets/index-CiX-gJ7O.css">
+    <script type="module" crossorigin src="/wordpress/portal/assets/index-BzaIhNQZ.js"></script>
+    <link rel="stylesheet" crossorigin href="/wordpress/portal/assets/index-Bskf6_oC.css">
   </head>
   <body>
     <div id="root"></div>

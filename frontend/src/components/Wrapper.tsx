@@ -3,8 +3,8 @@ import Navbar from "./Navbar";
 
 export default function Wrapper(props: PropsWithChildren) {
     return <>
-        <Navbar />
-        <div className="ml-52">
+        <Navbar className="w-52 hidden sm:flex" />
+        <div className="sm:ml-52">
             {props.children}
         </div>
     </>

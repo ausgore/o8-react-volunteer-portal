@@ -28,6 +28,14 @@ body {
     font-family: 'Segoe';
 }
 
+input {
+    border: none;
+    outline: none;
+}
 input[type=checkbox] {
+    width: 12px;
+    height: 12px;
     cursor: pointer;
+    border: 1px solid gray;
+    border-radius: 2px;
 }
