@@ -144,6 +144,7 @@ export default function Home() {
                     } else if (now < eventDate) {
                         eventStatus = "Upcoming";
                     } else {
+                        console.log(attendance, "hi");
                         if (!attendance) {
                             eventStatus = "No Show";
                         } else {

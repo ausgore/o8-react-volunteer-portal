@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import CRM from "../../crm";
 import config from "../../../config";
 import { CiFileOff } from "react-icons/ci";
+import { Spinner } from "flowbite-react";
 
 interface EventCardProps {
     event: any;
@@ -15,15 +16,21 @@ interface EventCardProps {
 const customParticipationDetailsSetName = 'participation_details';
 
 export default function EventCard(props: EventCardProps) {
+    const [loadingThumbnail, setLoadingThumbnail] = useState(true);
+    const [loadingVolunteers, setLoadingVolunteers] = useState(true);
     const [thumbnail, setThumbnail] = useState<string>();
     const [volunteers, setVolunteers] = useState(0);
     useEffect(() => {
         (async () => {
+            // Immmediately checking if there might be a thumbnail
+            if (!props.event[`${config.EventCustomFieldSetName}.thumbnail`]) setLoadingThumbnail(false);
+            // Getting the number of volunteers
             const response = await CRM("ActivityContact", "get", {
                 select: ["contact_id.email_primary.email"],
                 where: [[`activity_id.${customParticipationDetailsSetName}.event_activity_id`, "=", props.event.id]]
             });
             setVolunteers(response.data.length);
+            setLoadingVolunteers(false);
 
             // Getting thumbanil
             if (props.event[`${config.EventCustomFieldSetName}.thumbnail`]) {
@@ -32,6 +39,7 @@ export default function EventCard(props: EventCardProps) {
                     where: [["id", "=", props.event[`${config.EventCustomFieldSetName}.thumbnail`]]]
                 });
                 if (response.data[0]) setThumbnail(`${config.domain}/wp-content/uploads/civicrm/custom/${response.data[0].uri}`);
+                setLoadingThumbnail(false);
             }
         })();
     }, []);
@@ -42,10 +50,11 @@ export default function EventCard(props: EventCardProps) {
         <div className="bg-white w-full shadow-md rounded-md p-4 transition-transform duration-300 transform hover:scale-105 flex flex-col justify-between">
             <div>
                 {/* Image */}
-                <div className={"mb-4 h-[160px] rounded-lg relative bg-gray-200"}>
+                <div className={"mb-4 h-[160px] rounded-lg relative bg-gray-200 cursor-pointer"} onClick={() => navigate(`/events/${props.event.id}`)}>
                     {thumbnail && <img src={thumbnail} className="w-full h-full object-cover rounded-lg" />}
                     {!thumbnail && <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <CiFileOff className="text-[80px] text-gray-500" />
+                        {loadingThumbnail && <Spinner className="fill-secondary text-gray-300 w-[80px] h-[80px]" />}
+                        {!loadingThumbnail && <CiFileOff className="text-[80px] text-gray-500" />}
                     </div>}
                 </div>
                 <h1 className="font-semibold mb-4">{props.event.subject}</h1>
@@ -63,7 +72,9 @@ export default function EventCard(props: EventCardProps) {
                     {/* People */}
                     <div className="gap-x-3 flex items-center">
                         <GrGroup className="text-secondary" />
-                        <span className="text-sm font-semibold">{volunteers}{props.event["event_details.vacancy"] ? ` out of ${props.event["event_details.vacancy"]} people` : " have joined"}</span>
+                        <span className="text-sm font-semibold items-center">
+                            {loadingVolunteers ? <Spinner className="w-[14px] h-[14px] fill-secondary mr-1" /> : volunteers}{props.event[`${config.EventCustomFieldSetName}.vacancy`] ? ` out of ${props.event[`${config.EventCustomFieldSetName}.vacancy`]} people` : " have joined"}
+                        </span>
                     </div>
                 </div>
             </div>

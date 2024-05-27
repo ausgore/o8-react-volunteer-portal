@@ -1,8 +1,8 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { FieldOptions } from "../typings/types";
+import { FieldOptions } from "../../typings/types";
 
-interface DropdownField {
+interface CheckboxFieldProps {
     id: string;
     fields: any;
     /** The actual code to update a specific field by its id */
@@ -14,17 +14,18 @@ interface DropdownField {
     label: string;
 }
 
-export default function DropdownField(props: DropdownField) {
+export default function CheckboxField(props: CheckboxFieldProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement | null>(null);
 
     const toggleDropdown = () => setIsMenuOpen(!isMenuOpen);
-    const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleClick = (option: { id: number, label: string, value: any }) => {
         if (props.handleFields) {
-            toggleDropdown();
-            props.handleFields(props.id, e.target.value);
+            const value = props.fields[props.id] as number[] ?? [];
+            if (!value.includes(option.value)) value.push(option.value);
+            else value.splice(value.indexOf(option.value), 1);
+            props.handleFields(props.id, value);
         }
-
     }
 
     useEffect(() => {
@@ -43,15 +44,15 @@ export default function DropdownField(props: DropdownField) {
             <div className="relative mt-1" ref={dropdownRef}>
                 {/* Input */}
                 <div className="relative flex items-center">
-                    <input type="text" id={props.id} placeholder={props.disabled ? props.options.find(o => o.value == props.fields[props.id])?.label ?? "None provided" : props.placeholder ?? "Please select an option"} className={`w-full py-2 px-4 rounded-t-[5px] disabled:bg-white caret-transparent outline-none select-none ${!isMenuOpen ? "rounded-b-[5px]" : ""} cursor-pointer`} onClick={toggleDropdown} value={props.disabled ? "" : props.options.find(o => o.value == props.fields[props.id])?.label} disabled={props.disabled} />
+                    <input type="text" id={props.id} placeholder={`${props.fields[props.id] ? props.fields[props.id].length > 0 ? props.fields[props.id].length : "None" : "None"} selected`} className={`w-full py-2 px-4 rounded-t-[5px] disabled:bg-white disabled:cursor-not-allowed caret-transparent outline-none select-none ${!isMenuOpen ? "rounded-b-[5px]" : ""} cursor-pointer`} onClick={toggleDropdown} disabled={props.disabled} />
                     {!props.disabled && <IoIosArrowDown className="text-secondary absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none" />}
                 </div>
                 {/* Dropdown menu */}
                 {!props.disabled && isMenuOpen && <div className="absolute z-[1] bg-white w-full rounded-b-[5px] flex flex-col py-2" role="menu" aria-orientation="vertical">
-                    {props.options.map((opt: { label: string, value: any }) => {
-                        return <div className="inline-block">
-                            <input type="radio" className="hidden" name={props.id} value={opt.value} id={`${props.id}-${opt.value}`} defaultChecked={props.fields[props.id] == opt.value} onChange={onChange} />
-                            <label htmlFor={`${props.id}-${opt.value}`} className={`px-4 py-2 text-sm cursor-pointer block w-full ${props.fields[props.id] == opt.value ? "bg-gray-100" : "hover:bg-gray-100"}`}>{opt.label}</label>
+                    {props.options.map((opt: any) => {
+                        return <div className="inline-block px-4 py-2 items-center gap-x-3 cursor-pointer disabled:cursor-not-allowed hover:bg-gray-100 w-full" onClick={() => handleClick(opt)}>
+                            <input type="checkbox" id={`${props.id}-${opt.value}`} className="pointer-events-none" checked={props.fields[props.id]?.includes(opt.id) || props.fields[props.id]?.includes(opt.value)} />
+                            <label htmlFor={`${props.id}-${opt.value}`} className="text-sm w-full text-gray-600 ml-4 cursor-pointer pointer-events-none">{opt.label}</label>
                         </div>
                     })}
                 </div>}

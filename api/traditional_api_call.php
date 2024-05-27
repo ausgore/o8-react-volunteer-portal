@@ -29,8 +29,7 @@ if (is_array($select) && !empty($select))
     $params['select'] = $select;
 if (is_array($join) && !empty($join))
     $params['join'] = $join;
-if (is_array($where) && !empty($where))
-    $params['where'] = $where;
+if (is_array($where) && !empty($where)) $params['where'] = $where;
 if (is_array($order) && !empty($order)) {
     $orderBy = array();
     // $order = [[id, ASC], [createdAt, ASC]]

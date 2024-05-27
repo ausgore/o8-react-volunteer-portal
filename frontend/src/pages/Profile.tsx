@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import CRM from "../../crm";
 import Wrapper from "../components/Wrapper";
-import TextField from "../components/TextField";
-import DropdownField from "../components/DropdownField";
+import TextField from "../components/Fields/TextField";
+import DropdownField from "../components/Fields/DropdownField";
 import ResetPassword from "../assets/ResetPassword.png";
 
 import { FiEdit } from "react-icons/fi";
@@ -10,6 +10,9 @@ import { MdSaveAlt, MdOutlineLockReset } from "react-icons/md";
 import { CustomField, FieldOptions } from "../typings/types";
 import ConfirmationModal from "../components/ConfirmationModal";
 import config from "../../../config";
+import CheckboxField from "../components/Fields/CheckboxField";
+import { Spinner } from "flowbite-react";
+import Loading from "../components/Loading";
 
 export default function SecondProfile() {
     const [isEditing, setIsEditing] = useState(false);
@@ -101,6 +104,7 @@ export default function SecondProfile() {
         profileToUpdate.first_name = name.split(" ")[0];
         profileToUpdate.last_name = name.split(" ").splice(1, name.split(" ").length).join(" ");
 
+        console.log(Object.keys(profileToUpdate).map((p: string) => ([p, profileToUpdate[p]])))
         await CRM("Contact", "update", {
             where: [["id", "=", profileToUpdate.id]],
             values: Object.keys(profileToUpdate).map((p: string) => ([p, profileToUpdate[p]]))
@@ -126,9 +130,7 @@ export default function SecondProfile() {
     };
 
     return <Wrapper>
-        {!profile || !customFields ? <>
-            <h1 className="font-semibold text-lg">Loading profile...</h1>
-        </> : <>
+        {!profile || !customFields ? <Loading className="h-screen items-center" /> : <>
             <ConfirmationModal showModal={showModal} closeModal={closeModal} image={ResetPassword}>
                 <h1 className="font-semibold text-lg mt-4">Reset Email Sent</h1>
                 <p className="text-gray-500 text-ms mt-2">We have sent an email with a password reset link to <span className="text-gray-600 font-semibold">{email}</span></p>
@@ -203,6 +205,8 @@ export default function SecondProfile() {
                                         return <DropdownField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} options={field.options as FieldOptions[]} />
                                     case "Select":
                                         return <DropdownField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} options={field.options as FieldOptions[]} />
+                                    case "CheckBox":
+                                        return <CheckboxField className="flex justify-center" label={field.label} id={id} fields={profile} disabled={!isEditing} handleFields={handleProfile} options={field.options as FieldOptions[]} />
                                 }
                             })}
                         </div>

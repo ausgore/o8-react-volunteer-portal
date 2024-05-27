@@ -6,11 +6,13 @@ import config from "../../../config";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { useSearchParams } from "react-router-dom";
+import { Spinner } from "flowbite-react";
+import Loading from "../components/Loading";
+import Dropdown from "../components/Dropdown";
 
 export default function Events() {
     const [events, setEvents] = useState<any[] | null>();
     const [search, setSearch] = useState("");
-    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [categories, setCategories] = useState<any[]>();
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -35,10 +37,10 @@ export default function Events() {
 
     const handleSearch = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key == "Enter") {
-            const params: any = {};
-            if (search.length) params.search = search;
             setSearch("");
-            setSearchParams(params);
+            if (search.length) searchParams.set("search", search);
+            else searchParams.delete("search");
+            setSearchParams(searchParams);
         }
     }
 
@@ -52,7 +54,10 @@ export default function Events() {
 
         const where: [string, ComparisonOperator, any?][] = [["activity_type_id:name", "=", config.EventActivityTypeName]];
         const search = searchParams.get("search");
-        if (search) where.push(["subject", "CONTAINS", search])
+        if (search) where.push(["subject", "CONTAINS", search]);
+        const categories: number[] = JSON.parse(searchParams.get("categories") ?? "[]");
+        console.log(categories);
+        if (categories.length) where.push([`${config.EventCustomFieldSetName}.category`, "IN", categories])
 
         // Fetch all events
         let response = await CRM("Activity", "get", {
@@ -70,18 +75,15 @@ export default function Events() {
         setEvents(events);
     }
 
-    const [showDropmenu, setShowDropmenu] = useState(false);
-    const handleDropmenu = () => setShowDropmenu(!showDropmenu);
-    const updateSelectedCategories = (categoryId: number) => {
-        if (selectedCategories.includes(categoryId)) setSelectedCategories(selectedCategories.filter(c => c != categoryId));
-        else {
-            const newSelectedCategories = [...selectedCategories];
-            newSelectedCategories.push(categoryId);
-            setSelectedCategories(newSelectedCategories);
-        }
-    }
+    const updateCategory = (category: any) => {
+        const selectedCategories: number[] = JSON.parse(searchParams.get("categories") ?? "[]");
+        if (!selectedCategories.includes(parseInt(category.value))) selectedCategories.push(parseInt(category.value));
+        else selectedCategories.splice(selectedCategories.indexOf(parseInt(category.value)), 1);
 
-    useEffect(() => console.log(selectedCategories), [selectedCategories]);
+        if (!selectedCategories.length) searchParams.delete("categories");
+        else searchParams.set("categories", JSON.stringify(selectedCategories));
+        setSearchParams(searchParams);
+    }
 
     return <Wrapper>
         <div className="p-4 mb-12">
@@ -94,22 +96,16 @@ export default function Events() {
                     </div>
                     <div className="col-span-2 flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row justify-between lg:justify-normal gap-3">
                         {/* Category */}
-                        <div className="relative w-full lg:w-[200px]">
-                            {/* Button */}
-                            <button className="bg-secondary text-white flex justify-between px-4 py-2 rounded-md items-center w-full" onClick={handleDropmenu}>
-                                <span>Category</span>
-                                <IoIosArrowDown />
-                            </button>
-                            {/* Dropmenu */}
-                            {showDropmenu && <div className="absolute bg-white shadow-md rounded-md w-full mt-2 z-20">
+                        <Dropdown>
+                            <div className="absolute bg-white shadow-md rounded-md w-full min-w-[200px] mt-2 z-20">
                                 {categories?.map(category => {
-                                    return <div className="inline-block px-4 py-2 items-center gap-x-3 cursor-pointer hover:bg-gray-100 w-full" onClick={() => updateSelectedCategories(category.id)}>
-                                        <input type="checkbox" id={`${category.id}-${category.value}`} checked={selectedCategories.includes(category.id)} className="pointer-events-none" />
+                                    return <div className="inline-block px-4 py-2 items-center gap-x-3 cursor-pointer hover:bg-gray-100 w-full" onClick={() => updateCategory(category)}>
+                                        <input type="checkbox" id={`${category.id}-${category.value}`} className="pointer-events-none" checked={JSON.parse(searchParams.get("categories") ?? "[]").includes(parseInt(category.value))} />
                                         <label htmlFor={`${category.id}-${category.value}`} className="text-sm w-full text-gray-600 ml-4 cursor-pointer pointer-events-none">{category.label}</label>
                                     </div>
                                 })}
-                            </div>}
-                        </div>
+                            </div>
+                        </Dropdown>
 
                         {/* Date and Time is Cringe */}
                         <button className="bg-secondary text-white flex justify-between px-4 py-2 rounded-md items-center w-full lg:w-[200px]">
@@ -124,9 +120,7 @@ export default function Events() {
                     </div>
                 </div>
                 {/* Event cards */}
-                {!events ? <>
-                    <h1>Loading events...</h1>
-                </> : <>
+                {!events ? <Loading className="items-center h-full mt-20" /> : <>
                     {searchParams.get("search") && <h1 className="text-xl font-semibold text-gray-600">Results for: {searchParams.get("search")}</h1>}
                     {events.length == 0 && <p className="text-lg text-gray-500">Looks like there aren't any events</p>}
                     {events.length > 0 && <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">

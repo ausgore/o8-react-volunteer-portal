@@ -9,7 +9,11 @@ import { useState } from "react";
 import ConfirmationModal from "../ConfirmationModal";
 import SignOut from "../../assets/SignOut.png";
 
-export default function Navbar() {
+interface NavbarProps {
+    className: string;
+}
+
+export default function Navbar(props: NavbarProps) {
     const [isSigningOut, setIsSigningOut] = useState(false);
     const signOut = async () => {
         setIsSigningOut(true);
@@ -39,7 +43,7 @@ export default function Navbar() {
             </button>
             <p className="font-semibold mt-3 text-gray-400 cursor-pointer" onClick={closeModal}>Cancel</p>
         </ConfirmationModal>
-        <nav className="h-full w-52 fixed bg-white flex flex-col">
+        <nav className={`h-full fixed bg-white flex-col ${props.className}`}>
             {/* Responsible for the image */}
             <div className="p-4 flex items-center">
                 <img src={O8Logo} />
