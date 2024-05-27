@@ -14,6 +14,7 @@
     "date-fns": "^3.6.0",
     "flowbite-react": "^0.9.0",
     "moment": "^2.30.1",
+    "progressbar.js": "^1.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.2.1",
@@ -22,6 +23,7 @@
     "sweetalert": "^2.1.2"
   },
   "devDependencies": {
+    "@types/progressbar.js": "^1.1.7",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@types/sanitize-html": "^2.11.0",
