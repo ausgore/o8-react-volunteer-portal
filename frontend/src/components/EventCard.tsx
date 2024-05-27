@@ -19,7 +19,7 @@ export default function EventCard(props: EventCardProps) {
     const [volunteers, setVolunteers] = useState(0);
     useEffect(() => {
         (async () => {
-            const response = await CRM("ACtivityContact", "get", {
+            const response = await CRM("ActivityContact", "get", {
                 select: ["contact_id.email_primary.email"],
                 where: [[`activity_id.${customParticipationDetailsSetName}.event_activity_id`, "=", props.event.id]]
             });
