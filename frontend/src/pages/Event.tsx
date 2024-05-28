@@ -81,17 +81,20 @@ export default function Event() {
 
     // Getting volunteers for this event
     const updateVolunteers = async () => {
-        // const response = await CRM("ActivityContact", "get", {
-        //     select: ["contact_id.email_primary.email"],
-        //     where: [[`activity_id.${config.RegistrationCustomFieldSetName}.event_activity_id`, "=", id]]
-        // });
-
+        // This is currently getting all the source contact's emails that have created
+        // the registration event. IF you want to get the one associated with the created activity
+        // change the source_contact_id
         const response = await CRM("Activity", "get", {
-            select: ['id',],
+            select: ["contact.email_primary.email", "status_id:name"],
+            join: [
+                ["Contact AS contact", "LEFT", ["source_contact_id", "=", "contact.id"]]
+            ],
             where: [
-                ['participation_details.event_activity_id', '=', id],
+                [`${config.RegistrationCustomFieldSetName}.event_activity_id`, '=', id],
+                ["contact.email_primary.email", "=", email]
             ],
         });
+        console.log(response.data);
         setVolunteers(response.data);
     }
 
@@ -142,10 +145,10 @@ export default function Event() {
                     {/* Sign up */}
                     <div className="text-center max-w-[180px]">
                         {/* Can't sign up if they already volunteered OR if they are no longer within the registratino date */}
-                        {volunteers.map(v => v["contact_id.email_primary.email"]).includes(email) || !(Date.now() >= new Date(event[`${config.EventCustomFieldSetName}.registration_start`]).getTime() && Date.now() <= new Date(event[`${config.EventCustomFieldSetName}.registration_end`]).getTime()) || (event[`${config.EventCustomFieldSetName}.vacancy`] && volunteers.length >= event[`${config.EventCustomFieldSetName}.vacancy`]) ? <>
+                        {volunteers.map(v => (v["contact.email_primary.email"]).includes(email)) || !(Date.now() >= new Date(event[`${config.EventCustomFieldSetName}.registration_start`]).getTime() && Date.now() <= new Date(event[`${config.EventCustomFieldSetName}.registration_end`]).getTime()) || (event[`${config.EventCustomFieldSetName}.vacancy`] && volunteers.length >= event[`${config.EventCustomFieldSetName}.vacancy`]) ? <>
                             {/* Disabled */}
                             <button className="text-white font-semibold bg-primary rounded-md w-full py-[6px] px-2 mb-2 cursor-not-allowed" disabled={true}>
-                                {volunteers.map(v => v["contact_id.email_primary.email"]).includes(email) ? "Registered" : "Closed"}
+                                {volunteers.map(v => v["contact.email_primary.email"]).includes(email) ? volunteers.map(v => v["status_id:name"].includes("Cancelled")) ? "Cancelled" : "Registered" : "Closed"}
                             </button>
                         </> : <>
                             {/* Enabled */}
