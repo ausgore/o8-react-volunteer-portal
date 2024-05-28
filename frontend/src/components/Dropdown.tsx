@@ -2,6 +2,8 @@ import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io"
 
 interface DropdownFilterProps extends PropsWithChildren {
+    label: string;
+    className?: string;
 }
 export default function Dropdown(props: DropdownFilterProps) {
     const [showDropdown, setDropdown] = useState(false);
@@ -19,10 +21,10 @@ export default function Dropdown(props: DropdownFilterProps) {
 
     return <>
         {/* Category */}
-        <div className="relative w-full lg:w-[200px]" ref={dropdownRef}>
+        <div className={`relative w-full lg:w-[200px] ${props.className}`} ref={dropdownRef}>
             {/* Button */}
             <button className="bg-secondary text-white flex justify-between px-4 py-2 rounded-md items-center w-full" onClick={handleDropdown}>
-                <span>Category</span>
+                <span>{props.label}</span>
                 <IoIosArrowDown />
             </button>
             {/* Dropmenu */}

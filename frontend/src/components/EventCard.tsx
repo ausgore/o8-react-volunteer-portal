@@ -20,6 +20,7 @@ export default function EventCard(props: EventCardProps) {
     const [loadingVolunteers, setLoadingVolunteers] = useState(true);
     const [thumbnail, setThumbnail] = useState<string>();
     const [volunteers, setVolunteers] = useState(0);
+    
     useEffect(() => {
         (async () => {
             // Immmediately checking if there might be a thumbnail
@@ -67,9 +68,13 @@ export default function EventCard(props: EventCardProps) {
                 <h1 className="font-semibold mb-4">{props.event.subject}</h1>
                 <div className="grid grid-rows-1 gap-y-2 text-black/70">
                     {/* Date and Time */}
-                    <div className="gap-x-3 flex items-center">
-                        <FiCalendar className="text-secondary" />
-                        <span className="text-sm font-semibold">{moment(props.event.activity_date_time).format("D MMM YYYY, h:mma")}</span>
+                    <div className="flex items-center">
+                        <FiCalendar className="text-secondary mr-3" />
+                        <span className="text-sm font-semibold">
+                            {moment(props.event.activity_date_time).format("D MMM YYYY, h:mma")}
+                            <span className="text-sm mx-1">-</span>
+                            {moment(new Date(props.event.activity_date_time).getTime() + (props.event.duration * 60 * 1000)).format("h:mma")}
+                        </span>
                     </div>
                     {/* Location */}
                     <div className="gap-x-3 flex items-center">
