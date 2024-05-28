@@ -1,5 +1,3 @@
-import { CiCalendar, CiLocationOn } from "react-icons/ci";
-import { IoPeopleOutline } from "react-icons/io5";
 import EventCard from "../components/EventCard";
 import { useNavigate } from "react-router-dom";
 

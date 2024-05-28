@@ -109,13 +109,6 @@ async function cancelEvent(registrationActivityId: number) {
 }
 
 export default function Home() {
-    const userData = {
-        name: "Ashley Liz",
-        email: "ashleyliz@gmail.com",
-        phone: "+65 9876 5543",
-        imageUrl: ""
-    };
-
     const [profile, setProfile] = useState<Profile | null>();
     const [volunteeredEvents, setVolunteeredEvents] = useState<any[]>([]);
     const [hoursVolunteered, setHoursVolunteered] = useState<number>(0);
@@ -190,7 +183,8 @@ export default function Home() {
                     return {
                         id: status['id'],  // Added this line to include the registration ID
                         name: details['subject'],
-                        dateTime: format(parseISO(details['activity_date_time']), "dd/MM/yyyy hh:mm a"),
+                        dateTime: details['activity_date_time'], // Store raw date time string for sorting
+                        formattedDateTime: format(parseISO(details['activity_date_time']), "dd/MM/yyyy hh:mm a"), // Formatted date time for display
                         status: eventStatus,
                         location: details['location'],
                         eventId: details['id'],
@@ -200,7 +194,18 @@ export default function Home() {
                 let hoursVolunteered = parseFloat((minsVolunteeredCalc / 60).toFixed(1));
 
                 console.log(transformedEvents);
-                setVolunteeredEvents(transformedEvents);
+
+                // Sort the events based on status and activity date time
+                const sortedEvents = transformedEvents.sort((a, b) => {
+                    const statusOrder = ["Upcoming", "No Show", "Cancelled", "Completed"];
+                    const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+                    if (statusComparison !== 0) {
+                        return statusComparison;
+                    }
+                    return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
+                });
+
+                setVolunteeredEvents(sortedEvents);
                 setHoursVolunteered(hoursVolunteered);
                 setNumEventsParticipated(numEventsParticipatedCalc);
 

@@ -7,7 +7,7 @@ import { AiOutlineStop } from "react-icons/ai";
 interface Event {
   id: number;
   name: string;
-  dateTime: string;
+  formattedDateTime: string;
   status: string;
   location: string;
   eventId: number;
@@ -29,8 +29,6 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const eventsPerPage = 5;
-
-  const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,7 +90,7 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
             {currentEvents.map((event, index) => (
               <tr key={index}>
                 <td className="px-3 text-lg py-4 whitespace-nowrap pl-6">{event.name}</td>
-                <td className="px-3 text-lg py-4 whitespace-nowrap">{event.dateTime}</td>
+                <td className="px-3 text-lg py-4 whitespace-nowrap">{event.formattedDateTime}</td>
                 <td className="px-3 text-lg py-4 whitespace-nowrap">
                   <span className={`flex items-center justify-center px-4 text-lg leading-8 font-semibold rounded-md w-[120px] ${statusStyles[event.status]}`}>
                     {event.status}
