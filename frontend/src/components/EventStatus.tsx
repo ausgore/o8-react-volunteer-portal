@@ -23,7 +23,8 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
     "Upcoming": "bg-[#FFB656] text-white",
     "No Show": "bg-gray-400 text-white",
     "Cancelled": "bg-[#F26A6A] text-white",
-    "Completed": "bg-[#7BCF72] text-white"
+    "Completed": "bg-[#7BCF72] text-white",
+    "Cancelled By Organiser": "bg-gray-200 text-[#F26A6A]",
   };
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,15 +89,15 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentEvents.map((event, index) => (
-              <tr key={index}>
-                <td className="px-3 text-lg py-4 whitespace-nowrap pl-6">{event.name}</td>
-                <td className="px-3 text-lg py-4 whitespace-nowrap">{event.formattedDateTime}</td>
-                <td className="px-3 text-lg py-4 whitespace-nowrap">
+              <tr key={index} className={`${event.status === "Cancelled By Organiser" ? 'bg-gray-200' : ''}`}>
+                <td className={`px-3 text-lg py-4 whitespace-nowrap pl-6 ${event.status === "Cancelled By Organiser" ? 'text-gray-400' : ''}`}>{event.name}</td>
+                <td className={`px-3 text-lg py-4 whitespace-nowrap pl-6 ${event.status === "Cancelled By Organiser" ? 'text-gray-400' : ''}`}>{event.formattedDateTime}</td>
+                <td className={`px-3 text-lg py-4 whitespace-nowrap pl-6 ${event.status === "Cancelled By Organiser" ? 'font-black' : ''}`}>
                   <span className={`flex items-center justify-center px-4 text-lg leading-8 font-semibold rounded-md w-[120px] ${statusStyles[event.status]}`}>
                     {event.status}
                   </span>
                 </td>
-                <td className="px-3 text-lg py-4 whitespace-nowrap">{event.location}</td>
+                <td className={`px-3 text-lg py-4 whitespace-nowrap pl-6 ${event.status === "Cancelled By Organiser" ? 'text-gray-400' : ''}`}>{event.location}</td>
                 <td className="px-3 text-lg py-4 whitespace-nowrap relative">
                   <button
                     className={`text-gray-500 hover:text-gray-900 transition-transform transform ${openMenuIndex === index ? 'rotate-[-45deg] translate-y-3' : ''}`}
@@ -115,12 +116,12 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
                           <GrView className="mr-2" /> View
                         </li>
                         <li
-                          className={`px-4 py-2 flex items-center ${event.status === "Completed" || event.status === "Cancelled"
+                          className={`px-4 py-2 flex items-center ${event.status === "Completed" || event.status === "Cancelled" || event.status === "Cancelled By Organiser"
                             ? "text-gray-400 cursor-not-allowed"
                             : "hover:bg-gray-100 cursor-pointer"
                             }`}
                           onClick={() => {
-                            if (event.status !== "Completed" && event.status !== "Cancelled") {
+                            if (event.status !== "Completed" && event.status !== "Cancelled" && event.status !== "Cancelled By Organiser") {
                               openCancelModal(event.id);
                             }
                           }}

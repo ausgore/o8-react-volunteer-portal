@@ -48,6 +48,7 @@ async function fetchEventDetails(eventId: string) {
             'location',
             'activity_date_time',
             'duration',
+            'status_id:name',
         ],
         where: [
             ['id', '=', eventId],
@@ -168,6 +169,8 @@ export default function Home() {
 
                     if (status['status_id:name'] === 'Cancelled') {
                         eventStatus = "Cancelled";
+                    } else if (details['status_id:name'] === 'Cancelled') {
+                        eventStatus = "Cancelled By Organiser";
                     } else if (now < eventDate) {
                         eventStatus = "Upcoming";
                     } else {
@@ -197,7 +200,7 @@ export default function Home() {
 
                 // Sort the events based on status and activity date time
                 const sortedEvents = transformedEvents.sort((a, b) => {
-                    const statusOrder = ["Upcoming", "No Show", "Cancelled", "Completed"];
+                    const statusOrder = ["Upcoming", "No Show", "Cancelled", "Cancelled By Organiser", "Completed"];
                     const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
                     if (statusComparison !== 0) {
                         return statusComparison;
@@ -227,7 +230,7 @@ export default function Home() {
             const result = await cancelEvent(currentRegistrationId);
             if (result) {
                 setShowCancelModal(false);
-                swal("Event has been cancelled!", {
+                swal("Event has been cancelled", {
                     icon: "success",
                 });
                 setIsCancelling(false);
@@ -236,6 +239,10 @@ export default function Home() {
                         event.id === currentRegistrationId ? { ...event, status: "Cancelled" } : event
                     )
                 );
+            } else {
+                swal("Event cancellation failed", {
+                    icon: "error",
+                });
             }
         }
     };

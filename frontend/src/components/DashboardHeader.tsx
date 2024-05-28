@@ -9,7 +9,7 @@ interface DashboardHeaderProps {
     imageUrl: string;
 }
 
-export default function DashboardHeader(/*{ name, email, phone, imageUrl }*/props: DashboardHeaderProps) {
+export default function DashboardHeader(props: DashboardHeaderProps) {
     return (
         <div
             className="relative p-6 md:p-10 shadow-md flex flex-col md:flex-row justify-between items-center rounded-lg w-full"
