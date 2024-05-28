@@ -50,9 +50,9 @@ export default function Event() {
 
             // Getting thumbanil
             if (event[`${config.EventCustomFieldSetName}.thumbnail`]) {
-                response = await CRM("File", "get", { 
+                response = await CRM("File", "get", {
                     select: ["uri"],
-                    where: [["id", "=", event[`${config.EventCustomFieldSetName}.thumbnail`]]] 
+                    where: [["id", "=", event[`${config.EventCustomFieldSetName}.thumbnail`]]]
                 });
                 if (response.data[0]) setThumbnail(`${config.domain}/wp-content/uploads/civicrm/custom/${response.data[0].uri}`);
             }
@@ -81,9 +81,16 @@ export default function Event() {
 
     // Getting volunteers for this event
     const updateVolunteers = async () => {
-        const response = await CRM("ActivityContact", "get", {
-            select: ["contact_id.email_primary.email"],
-            where: [[`activity_id.${config.RegistrationCustomFieldSetName}.event_activity_id`, "=", id]]
+        // const response = await CRM("ActivityContact", "get", {
+        //     select: ["contact_id.email_primary.email"],
+        //     where: [[`activity_id.${config.RegistrationCustomFieldSetName}.event_activity_id`, "=", id]]
+        // });
+
+        const response = await CRM("Activity", "get", {
+            select: ['id',],
+            where: [
+                ['participation_details.event_activity_id', '=', id],
+            ],
         });
         setVolunteers(response.data);
     }

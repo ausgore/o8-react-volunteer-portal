@@ -26,9 +26,16 @@ export default function EventCard(props: EventCardProps) {
             // Immmediately checking if there might be a thumbnail
             if (!props.event[`${config.EventCustomFieldSetName}.thumbnail`]) setLoadingThumbnail(false);
             // Getting the number of volunteers
-            const response = await CRM("ActivityContact", "get", {
-                select: ["contact_id.email_primary.email"],
-                where: [[`activity_id.${customParticipationDetailsSetName}.event_activity_id`, "=", props.event.id]]
+            // const response = await CRM("ActivityContact", "get", {
+            //     select: ["contact_id.email_primary.email"],
+            //     where: [[`activity_id.${customParticipationDetailsSetName}.event_activity_id`, "=", props.event.id]]
+            // });
+            
+            const response = await CRM("Activity", "get", {
+                select: ['id',],
+                where: [
+                    ['participation_details.event_activity_id', '=', props.event.id],
+                ],
             });
             setVolunteers(response.data.length);
             setLoadingVolunteers(false);
