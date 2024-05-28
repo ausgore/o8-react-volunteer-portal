@@ -5,11 +5,40 @@ import DashboardHeader from "../components/DashboardHeader";
 import DashboardStats from "../components/DashboardStats";
 import EventStatus from "../components/EventStatus";
 import UpcomingEvents from "../components/UpcomingEvents";
+import Loading from "../components/Loading";
 import config from "../../../config";
 import { format, parseISO } from "date-fns";
 import ConfirmationModal from "../components/ConfirmationModal";
 import CancelEvent from "../assets/undraw_cancel_re_pkdm.svg";
 import swal from 'sweetalert';
+
+async function fetchProfileDetails(email: string) {
+    const response = await CRM("Contact", "get", {
+        select: [
+            "email_primary.email",
+            "phone_primary.phone_numeric",
+            "first_name",
+            "last_name",
+            `${config.ProfileCustomFieldSetName}.*`
+        ],
+        where: [["email_primary.email", "=", email]]
+    });
+
+    let profile = response.data[0];
+    return {
+        name: profile["first_name"] + ' ' + profile["last_name"],
+        email: profile["email_primary.email"],
+        phone: profile["phone_primary.phone_numeric"],
+        imageUrl: "",
+    };
+}
+
+interface Profile {
+    name: any;
+    email: any;
+    phone: any;
+    imageUrl: string;
+}
 
 // Function to fetch event details
 async function fetchEventDetails(eventId: string) {
@@ -87,6 +116,7 @@ export default function Home() {
         imageUrl: ""
     };
 
+    const [profile, setProfile] = useState<Profile | null>();
     const [volunteeredEvents, setVolunteeredEvents] = useState<any[]>([]);
     const [hoursVolunteered, setHoursVolunteered] = useState<number>(0);
     const [numEventsParticipated, setNumEventsParticipated] = useState<number>(0);
@@ -101,6 +131,10 @@ export default function Home() {
 
         (async function () {
             try {
+                const profile = await fetchProfileDetails(email);
+                console.log(profile);
+                setProfile(profile);
+
                 const allEventRegistration = await CRM('Activity', 'get', {
                     select: [
                         'status_id:name',
@@ -144,7 +178,6 @@ export default function Home() {
                     } else if (now < eventDate) {
                         eventStatus = "Upcoming";
                     } else {
-                        console.log(attendance, "hi");
                         if (!attendance) {
                             eventStatus = "No Show";
                         } else {
@@ -207,11 +240,11 @@ export default function Home() {
             <div className="p-4 mb-12">
                 <div className="w-full px-0 md:px-6">
                     {loading ? (
-                        <h1><b>Loading...</b></h1>
+                        <Loading className="h-screen items-center" />
                     ) : (
                         <div>
                             <div className="mb-6 flex">
-                                <DashboardHeader {...userData} />
+                                {profile && <DashboardHeader {...profile} />}
                             </div>
 
                             <DashboardStats {...{ hours: hoursVolunteered, events: numEventsParticipated }} />
