@@ -99,19 +99,12 @@ export default function Events() {
                 "subject",
                 "location",
                 "activity_date_time",
-                "duration"
+                "duration",
+                "status_id:name"
             ],
             where,
         });
-        const events = (response.data as any[])
-            .filter(e => {
-                let afterStartingTime = true;
-                if (!searchParams.has("date") && searchParams.has("startTime")) {
-                    const date = new Date(e.activity_date_time);
-                    console.log(date);
-                }
-                return afterStartingTime;
-            });
+        const events = response.data;
         setEvents(events);
     }
 

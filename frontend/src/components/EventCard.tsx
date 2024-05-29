@@ -13,13 +13,13 @@ interface EventCardProps {
     className?: string;
 }
 
-const customParticipationDetailsSetName = 'participation_details';
-
 export default function EventCard(props: EventCardProps) {
     const [loadingThumbnail, setLoadingThumbnail] = useState(true);
     const [loadingVolunteers, setLoadingVolunteers] = useState(true);
     const [thumbnail, setThumbnail] = useState<string>();
     const [volunteers, setVolunteers] = useState(0);
+
+    console.log(props.event);
     
     useEffect(() => {
         (async () => {
@@ -56,6 +56,7 @@ export default function EventCard(props: EventCardProps) {
 
     return <div className={props.className}>
         <div className="bg-white w-full shadow-md rounded-md p-4 transition-transform duration-300 transform hover:scale-105 flex flex-col justify-between">
+            {props.event["status_id:name"] == "Cancelled" && <div className="bg-gray-500/50 w-full h-full absolute top-0 left-0 z-10 rounded-md" />}
             <div>
                 {/* Image */}
                 <div className={"mb-4 h-[160px] rounded-lg relative bg-gray-200 cursor-pointer"} onClick={() => navigate(`/events/${props.event.id}`)}>
