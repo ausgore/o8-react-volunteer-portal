@@ -11,6 +11,7 @@ import { CustomField } from "../typings/types";
 import config from "../../../config";
 import { CiFileOff } from "react-icons/ci";
 import Loading from "../components/Loading";
+import RegistrationButton from "../components/RegistrationButton";
 
 const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail"]
 
@@ -100,7 +101,6 @@ export default function Event() {
 
     // Signing the volunteer up for the event
     const signUp = async () => {
-        setIsVolunteering(true);
         // Getting the user's ID
         // TOOD: UseContext
         let response = await CRM("Contact", "get", {
@@ -121,7 +121,6 @@ export default function Event() {
 
         await updateVolunteers();
         alert(`You have volunteered for ${event.subject}`);
-        setIsVolunteering(false);
     }
 
     return <Wrapper>
@@ -144,18 +143,7 @@ export default function Event() {
                     </div>
                     {/* Sign up */}
                     <div className="text-center max-w-[180px]">
-                        {/* Can't sign up if they already volunteered OR if they are no longer within the registratino date */}
-                        {volunteers.map(v => (v["contact.email_primary.email"]).includes(email)) || !(Date.now() >= new Date(event[`${config.EventCustomFieldSetName}.registration_start`]).getTime() && Date.now() <= new Date(event[`${config.EventCustomFieldSetName}.registration_end`]).getTime()) || (event[`${config.EventCustomFieldSetName}.vacancy`] && volunteers.length >= event[`${config.EventCustomFieldSetName}.vacancy`]) ? <>
-                            {/* Disabled */}
-                            <button className="text-white font-semibold bg-primary rounded-md w-full py-[6px] px-2 mb-2 cursor-not-allowed" disabled={true}>
-                                {volunteers.map(v => v["contact.email_primary.email"]).includes(email) ? volunteers.map(v => v["status_id:name"].includes("Cancelled")) ? "Cancelled" : "Registered" : "Closed"}
-                            </button>
-                        </> : <>
-                            {/* Enabled */}
-                            <button onClick={signUp} className="text-white font-semibold bg-secondary rounded-md w-full py-[6px] px-2 mb-2 disabled:bg-primary" disabled={isVolunteering}>
-                                {isVolunteering ? "Please wait..." : "Sign Up"}
-                            </button>
-                        </>}
+                        <RegistrationButton volunteers={volunteers} event={event} updateVolunteers={updateVolunteers}> Sign Up </RegistrationButton>
                         {/* Registration deadline */}
                         <p className="text-xs">Registration: {moment(event[`${config.EventCustomFieldSetName}.registration_start`]).format("DD MMMM")} - {moment(event[`${config.EventCustomFieldSetName}.registration_end`]).format("DD MMMM")}</p>
                     </div>
