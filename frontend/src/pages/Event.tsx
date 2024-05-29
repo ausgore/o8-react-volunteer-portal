@@ -88,15 +88,16 @@ export default function Event() {
         const response = await CRM("Activity", "get", {
             select: ["contact.email_primary.email", "status_id:name"],
             join: [
-                ["Contact AS contact", "LEFT", ["source_contact_id", "=", "contact.id"]]
+                ["Contact AS contact", "LEFT", ["target_contact_id", "=", "contact.id"]]
             ],
             where: [
                 [`${config.RegistrationCustomFieldSetName}.event_activity_id`, '=', id],
-                ["contact.email_primary.email", "=", email]
+                // ["contact.email_primary.email", "=", email]
             ],
         });
-        console.log(response.data);
         setVolunteers(response.data);
+        
+        return response.data;
     }
 
     // Signing the volunteer up for the event

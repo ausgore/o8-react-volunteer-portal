@@ -13,6 +13,7 @@ import config from "../../../config";
 import CheckboxField from "../components/Fields/CheckboxField";
 import { Spinner } from "flowbite-react";
 import Loading from "../components/Loading";
+import swal from "sweetalert";
 
 export default function SecondProfile() {
     const [isEditing, setIsEditing] = useState(false);
@@ -109,7 +110,10 @@ export default function SecondProfile() {
             where: [["id", "=", profileToUpdate.id]],
             values: Object.keys(profileToUpdate).map((p: string) => ([p, profileToUpdate[p]]))
         });
-        alert("Successfully updated profile.");
+
+        swal("Successfully updated profile!", {
+            icon: "success",
+        });
 
         setIsUpdating(false);
         setProfile(profileToUpdate);

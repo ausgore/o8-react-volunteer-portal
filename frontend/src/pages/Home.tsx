@@ -80,6 +80,7 @@ async function getUnvolunteeredEvents(volunteeredActivitiesArr: number[]) {
             "subject",
             "location",
             "activity_date_time",
+            "duration",
             config.EventCustomFieldSetName + ".vacancy",
         ],
         where: [
@@ -139,14 +140,25 @@ export default function Home() {
                     ],
                     where: [
                         ['activity_contact.contact_id.email_primary.email', '=', email],
-                        ['activity_type_id:label', '=', config.RegistrationActivityTypeName],
+                        ['activity_type_id:name', '=', config.RegistrationActivityTypeName],
                     ],
                     order: [
                         ['id', 'ASC']
                     ],
                 });
 
-                const unifiedPromises = allEventRegistration.data.map(async (activity: any) => {
+                // Remove duplicates based on status.id
+                const uniqueStatuses = new Set();
+                const filteredEventRegistration = allEventRegistration.data.filter((activity: any) => {
+                    if (uniqueStatuses.has(activity.id)) {
+                        return false;
+                    } else {
+                        uniqueStatuses.add(activity.id);
+                        return true;
+                    }
+                });
+
+                const unifiedPromises = filteredEventRegistration.map(async (activity: any) => {
                     const eventId = activity[config.RegistrationCustomFieldSetName + '.event_activity_id'];
                     const [eventDetail, eventAttendance] = await Promise.all([
                         fetchEventDetails(eventId),
@@ -205,7 +217,7 @@ export default function Home() {
                     if (statusComparison !== 0) {
                         return statusComparison;
                     }
-                    return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
+                    return new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
                 });
 
                 setVolunteeredEvents(sortedEvents);
