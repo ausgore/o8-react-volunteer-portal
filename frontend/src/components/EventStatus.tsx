@@ -112,7 +112,12 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
                         }`}
                     >
                       <ul>
-                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center" onClick={() => navigate(`/events/${event.eventId}`)}>
+                        <li
+                          className={`px-4 py-2 flex items-center ${event.status === "Cancelled By Organiser"
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "hover:bg-gray-100 cursor-pointer"
+                            }`}
+                          onClick={() => navigate(`/events/${event.eventId}`)}>
                           <GrView className="mr-2" /> View
                         </li>
                         <li
@@ -126,7 +131,7 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
                             }
                           }}
                         >
-                          <AiOutlineStop className="mr-2 text-black" /> Cancel
+                          <AiOutlineStop className="mr-2" /> Cancel
                         </li>
                       </ul>
                     </div>
