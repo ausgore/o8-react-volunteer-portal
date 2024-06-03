@@ -19,7 +19,6 @@ async function fetchProfileDetails(email: string) {
             "phone_primary.phone_numeric",
             "first_name",
             "last_name",
-            `${config.ProfileCustomFieldSetName}.*`
         ],
         where: [["email_primary.email", "=", email]]
     });
@@ -127,7 +126,6 @@ export default function Home() {
         (async function () {
             try {
                 const profile = await fetchProfileDetails(email);
-                console.log(profile);
                 setProfile(profile);
 
                 const allEventRegistration = await CRM('Activity', 'get', {

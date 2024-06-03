@@ -8,17 +8,19 @@ import axios from "axios";
 import { useState } from "react";
 import ConfirmationModal from "../ConfirmationModal";
 import SignOut from "../../assets/SignOut.png";
+import config from "../../../../config";
 
 interface NavbarProps {
     className: string;
 }
 
 export default function Navbar(props: NavbarProps) {
+
     const [isSigningOut, setIsSigningOut] = useState(false);
     const signOut = async () => {
         setIsSigningOut(true);
-        await axios.get("http://localhost/wordpress/portal/api/logout.php");
-        window.location.href = `${window.location.protocol}//${window.location.hostname}/wordpress/wp-login.php?redirect_to=${encodeURIComponent(window.location.href)}`;
+        await axios.get(`${config.domain}/portal/api/logout.php`);
+        window.location.href = `${window.location.protocol}//${window.location.hostname}/wp-login.php?redirect_to=${encodeURIComponent(window.location.href)}`;
     }
 
     const [showModal, setShowModal] = useState(false);
