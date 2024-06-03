@@ -11,7 +11,6 @@ import { CustomField, FieldOptions } from "../typings/types";
 import ConfirmationModal from "../components/ConfirmationModal";
 import config from "../../../config";
 import CheckboxField from "../components/Fields/CheckboxField";
-import { Spinner } from "flowbite-react";
 import Loading from "../components/Loading";
 import swal from "sweetalert";
 
@@ -144,7 +143,7 @@ export default function SecondProfile() {
                 <p className="font-semibold text-sm mt-2 text-gray-400">Send Again</p>
             </ConfirmationModal>
             {/* The actual page itself */}
-            <div className="mb-12">
+            <div className="mb-24">
                 {/* Header */}
                 <div className="p-4 relative bg-primary/20 h-[140px]">
                     <h1 className="">Profile</h1>
