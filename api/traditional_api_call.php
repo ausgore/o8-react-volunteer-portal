@@ -1,6 +1,6 @@
 <?php
-require_once '..\..\wp-content\plugins\civicrm\civicrm\civicrm.config.php';
-require_once '..\..\wp-content\plugins\civicrm\civicrm\CRM\Core\Config.php';
+require_once '../../wp-content/plugins/civicrm/civicrm/civicrm.config.php';
+require_once '../../wp-content/plugins/civicrm/civicrm/CRM/Core/Config.php';
 
 $query = array();
 if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {

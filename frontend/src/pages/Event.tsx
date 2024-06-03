@@ -100,30 +100,6 @@ export default function Event() {
         return response.data;
     }
 
-    // Signing the volunteer up for the event
-    const signUp = async () => {
-        // Getting the user's ID
-        // TOOD: UseContext
-        let response = await CRM("Contact", "get", {
-            select: ["id"],
-            where: [["email_primary.email", "=", email]]
-        });
-        const { id } = response.data[0];
-
-        // Creating the Participation Activity
-        response = await CRM("Activity", "create", {
-            values: [
-                ["activity_type_id:name", config.RegistrationActivityTypeName],
-                ["source_contact_id", id],
-                ["subject", event.subject],
-                [`${config.RegistrationCustomFieldSetName}.event_activity_id`, event.id]
-            ]
-        });
-
-        await updateVolunteers();
-        alert(`You have volunteered for ${event.subject}`);
-    }
-
     return <Wrapper>
         {!event ? <Loading className="h-screen items-center" /> : <div className="p-4">
             <h1>Event Details</h1>
@@ -157,6 +133,10 @@ export default function Event() {
                         <div className="flex flex-row items-center gap-x-3 font-bold text-lg">
                             <MdPeopleAlt size={22} />
                             <span>{volunteers.length}</span>
+                            {event[`${config.EventCustomFieldSetName}.vacancy`] > 0 && <>
+                                <span>/</span>
+                                <span>{event[`${config.EventCustomFieldSetName}.vacancy`]}</span>
+                            </>}
                         </div>
                     </div>
                     {/* Location */}

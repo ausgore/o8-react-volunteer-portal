@@ -7,7 +7,6 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 import { createSearchParams, useSearchParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import Dropdown from "../components/Dropdown";
-import { FiCalendar, FiClock } from "react-icons/fi";
 import "react-datepicker/dist/react-datepicker.css";
 import ReactDatePicker from "react-datepicker";
 import moment from "moment";
@@ -77,18 +76,16 @@ export default function Events() {
         const regions: number[] = JSON.parse(searchParams.get("regions") ?? "[]");
         if (regions.length) where.push([`${config.EventCustomFieldSetName}.region`, "IN", regions]);
 
-        if (searchParams.has("date")) {
-            const date = new Date(JSON.parse(searchParams.get("date") as string));
-            if (searchParams.has("startTime")) {
-                if (searchParams.has("startTime")) {
-                    const startTime = moment(searchParams.get("startTime") as string).format("HH:mm:ss");
-                    where.push(["activity_date_time", ">=", `${moment(date).format("YYYY-MM-DD")} ${startTime}`]);
-                }
-            }
-            where.push(["activity_date_time", ">=", `${moment(date).format("YYYY-MM-DD")} 00:00:00`]);
-            date.setDate(date.getDate() + 1);
-            where.push(["activity_date_time", "<", `${moment(date).format("YYYY-MM-DD")} 00:00:00`]);
+        let startDate, endDate;
+        if (searchParams.has("date")) startDate = new Date(JSON.parse(searchParams.get("date") as string));
+        if (searchParams.has("endDate")) endDate = new Date(JSON.parse(searchParams.get("endDate") as string));
+
+        if (startDate) {
+            where.push(["activity_date_time", ">=", `${moment(startDate).format("YYYY-MM-DD")} 00:00:00`]);
+            if (endDate) where.push(["activity_date_time", "<", `${moment(endDate).format("YYYY-MM-DD")} 23:59:59`]);
+            else where.push(["activity_date_time", "<", `${moment(endDate).format("YYYY-MM-DD")} 23:59:59`]);
         }
+        else if (endDate) where.push(["activity_date_time", "<", `${moment(endDate).format("YYYY-MM-DD")} 23:59:59`]);
 
 
         // Fetch all events
@@ -118,10 +115,6 @@ export default function Events() {
         setSearchParams(searchParams);
     }
 
-    const minTime = new Date();
-    minTime.setHours(0, 0, 0, 999);
-    const maxTime = new Date();
-    maxTime.setHours(23, 59, 59, 999);
     const handleDateChange = (type: string, date: Date | null) => {
         if (date) searchParams.set(type, JSON.stringify(date));
         else searchParams.delete(type);
@@ -148,6 +141,16 @@ export default function Events() {
                         <FaMagnifyingGlass className="text-gray-500 absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" />
                     </div>
                     <div className="col-span-2 flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row justify-between lg:justify-normal gap-3">
+                        <Dropdown label="Location" className="col-span-1 md:col-span-2 lg:col-span-2">
+                            <div className="absolute bg-white shadow-md rounded-md w-full min-w-[200px] mt-2 z-20 right-0">
+                                {regions?.map(region => {
+                                    return <div className="inline-block px-4 py-2 items-center gap-x-3 cursor-pointer hover:bg-gray-100 w-full" onClick={() => updateSelection("regions", region)}>
+                                        <input type="checkbox" id={`${region.id}-${region.value}`} className="pointer-events-none" checked={JSON.parse(searchParams.get("regions") ?? "[]").includes(parseInt(region.value))} />
+                                        <label htmlFor={`${region.id}-${region.value}`} className="text-sm w-full text-gray-600 ml-4 cursor-pointer pointer-events-none">{region.label}</label>
+                                    </div>
+                                })}
+                            </div>
+                        </Dropdown>
                         <Dropdown label="Category">
                             <div className="absolute bg-white shadow-md rounded-md w-full min-w-[200px] mt-2 z-20">
                                 {categories?.map(category => {
@@ -161,58 +164,34 @@ export default function Events() {
                         <Dropdown label="Date & Time">
                             <div className="absolute bg-white shadow-md rounded-md w-max min-w-full mt-2 p-4 z-20 right-0">
                                 <div className="flex flex-col md:flex-row gap-3 gap-x-4">
-                                    <div className="flex flex-row items-center text-gray-600">
-                                        <FiCalendar className="mr-3 sm:text-xl" />
-                                        <ReactDatePicker
-                                            selected={searchParams.get("date") ? new Date(JSON.parse(searchParams.get("date") as string)) : undefined}
-                                            onChange={d => handleDateChange("date", d)}
-                                            dateFormat="d MMMM, yyyy"
-                                            className="mt-1 block px-4 py-2 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none sm:text-sm w-[160px] text-center text-sm"
-                                        />
+                                    <div>
+                                        <label htmlFor="date" className="text-sm text-gray-600">Starting Date</label>
+                                        <div className="flex flex-row items-center text-gray-600">
+                                            <ReactDatePicker
+                                                id="date"
+                                                selected={searchParams.get("date") ? new Date(JSON.parse(searchParams.get("date") as string)) : undefined}
+                                                onChange={d => handleDateChange("date", d)}
+                                                dateFormat="d MMMM, yyyy"
+                                                className="mt-1 block px-4 py-2 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none sm:text-sm w-[160px] text-center text-sm"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="flex flex-row items-center text-gray-600">
-                                        <FiClock className="mr-3 sm:text-xl" />
-                                        {/* Starting Time */}
-                                        <ReactDatePicker
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            dateFormat="h:mm aa"
-                                            disabled={searchParams.has("date")}
-                                            minTime={searchParams.get("endTime") ? minTime : undefined}
-                                            maxTime={searchParams.get("endTime") ? new Date(JSON.parse(searchParams.get("endTime") as string)) : undefined}
-                                            selected={searchParams.get("startTime") ? new Date(JSON.parse(searchParams.get("startTime") as string)) : undefined}
-                                            onChange={d => handleDateChange("startTime", d)}
-                                            className="mt-1 block px-4 py-2 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none sm:text-sm w-[90px] text-center text-sm"
-                                        />
-                                        {/* <span className="mx-3">-</span> */}
-                                        {/* Ending Time */}
-                                        {/* <ReactDatePicker
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            dateFormat="h:mm aa"
-                                            minTime={searchParams.get("startTime") ? new Date(JSON.parse(searchParams.get("startTime") as string)) : undefined}
-                                            maxTime={searchParams.get("startTime") ? maxTime : undefined}
-                                            selected={searchParams.get("endTime") ? new Date(JSON.parse(searchParams.get("endTime") as string)) : undefined}
-                                            onChange={d => handleDateChange("endTime", d)}
-                                            className="mt-1 block px-4 py-2 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none sm:text-sm w-[90px] text-center text-sm"
-                                        /> */}
+                                    <div>
+                                        <label htmlFor="endDate" className="text-sm text-gray-600">Ending Date</label>
+                                        <div className="flex flex-row items-center text-gray-600">
+                                            <ReactDatePicker
+                                                id="endDate"
+                                                selected={searchParams.get("endDate") ? new Date(JSON.parse(searchParams.get("endDate") as string)) : undefined}
+                                                onChange={d => handleDateChange("endDate", d)}
+                                                dateFormat="d MMMM, yyyy"
+                                                className="mt-1 block px-4 py-2 border border-gray-300 bg-gray-100 rounded-md shadow-sm focus:outline-none sm:text-sm w-[160px] text-center text-sm"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                                {(searchParams.has("date") || searchParams.has("startTime") || searchParams.has("endTime")) &&
-                                    <button className="text-sm text-secondary mt-3" onClick={() => clearDateAndTimeFilters(["date", "startTime", "endTime"])}>Clear Date & Time Filters </button>}
+                                {(searchParams.has("date") || searchParams.has("endDate")) &&
+                                    <button className="text-sm text-secondary mt-3" onClick={() => clearDateAndTimeFilters(["date", "endDate"])}>Clear Date Filters </button>}
 
-                            </div>
-                        </Dropdown>
-                        <Dropdown label="Location" className="col-span-1 md:col-span-2 lg:col-span-2">
-                            <div className="absolute bg-white shadow-md rounded-md w-full min-w-[200px] mt-2 z-20 right-0">
-                                {regions?.map(region => {
-                                    return <div className="inline-block px-4 py-2 items-center gap-x-3 cursor-pointer hover:bg-gray-100 w-full" onClick={() => updateSelection("regions", region)}>
-                                        <input type="checkbox" id={`${region.id}-${region.value}`} className="pointer-events-none" checked={JSON.parse(searchParams.get("regions") ?? "[]").includes(parseInt(region.value))} />
-                                        <label htmlFor={`${region.id}-${region.value}`} className="text-sm w-full text-gray-600 ml-4 cursor-pointer pointer-events-none">{region.label}</label>
-                                    </div>
-                                })}
                             </div>
                         </Dropdown>
                     </div>
