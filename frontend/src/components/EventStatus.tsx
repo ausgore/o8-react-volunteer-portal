@@ -1,8 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import CRM from "../../crm";
 import { useNavigate } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { GrView } from "react-icons/gr";
 import { AiOutlineStop } from "react-icons/ai";
+import ConfirmationModal from "./ConfirmationModal";
+import config from "../../../config";
+import swal from "sweetalert";
 
 interface Event {
   id: number;
@@ -11,6 +15,7 @@ interface Event {
   status: string;
   location: string;
   eventId: number;
+  duration: number;
 }
 
 interface EventStatusProps {
@@ -18,17 +23,43 @@ interface EventStatusProps {
   openCancelModal: (registrationId: number) => void;
 }
 
+// Function to check attendance code
+async function checkAttendanceCode(eventId: number, attendanceCode: string) {
+  const eventDetail = await CRM('Activity', 'get', {
+    select: [
+      'subject',
+      `${config.EventCustomFieldSetName}.attendance_code`
+    ],
+    where: [
+      ['id', '=', eventId],
+      [`${config.EventCustomFieldSetName}.attendance_code`, '=', attendanceCode]
+    ],
+  });
+
+  return eventDetail.data;
+}
+
 export default function EventStatus({ events, openCancelModal }: EventStatusProps) {
+  const email = (window as any).email as string ?? config.email;
+
   const statusStyles: { [key: string]: string } = {
     "Upcoming": "bg-[#FFB656] text-white",
+    "Check In": "bg-[#57D5FF] text-white",
     "No Show": "bg-gray-400 text-white",
     "Cancelled": "bg-[#F26A6A] text-white",
     "Completed": "bg-[#7BCF72] text-white",
     "Cancelled By Organiser": "bg-gray-200 text-[#F26A6A]",
+    "Checked In": "bg-[#5A71B4] text-white",
   };
 
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [attendanceCode, setAttendanceCode] = useState("");
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  const [selectedEventDuration, setSelectedEventDuration] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [eventList, setEventList] = useState<Event[]>(events);
   const eventsPerPage = 5;
 
   useEffect(() => {
@@ -44,10 +75,10 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
   }, [openMenuIndex]);
 
   // Calculate the total number of pages
-  const totalPages = Math.ceil(events.length / eventsPerPage);
+  const totalPages = Math.ceil(eventList.length / eventsPerPage);
 
   // Get the events to display on the current page
-  const currentEvents = events.slice(
+  const currentEvents = eventList.slice(
     (currentPage - 1) * eventsPerPage,
     currentPage * eventsPerPage
   );
@@ -73,6 +104,75 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
 
   const navigate = useNavigate();
 
+  const handleCheckInClick = (event: Event) => {
+    setSelectedEventId(event.eventId);
+    setSelectedEventDuration(event.duration);
+    setIsPopupOpen(true);
+  };
+
+  const handlePopupSubmit = async () => {
+    if (selectedEventId !== null) {
+      setIsSubmitting(true);
+      console.log("Attendance code submitted:", attendanceCode, "for event ID:", selectedEventId);
+      const result = await checkAttendanceCode(selectedEventId, attendanceCode);
+      console.log(result);
+      if (result.length > 0) {
+        setAttendanceCode("");
+
+        let response = await CRM("Contact", "get", {
+          select: ["id"],
+          where: [["email_primary.email", "=", email]]
+        });
+        const { id } = response.data[0];
+
+        // Creating the Participation Activity
+        response = await CRM("Activity", "create", {
+          values: [
+            ["activity_type_id:name", config.LoggingAttendanceActivityTypeName],
+            ["target_contact_id", [id]],
+            ["source_contact_id", id], //add status update
+            ["duration", selectedEventDuration],
+            [`${config.LoggingAttendanceCustomFieldSetName}.event_activity_id`, selectedEventId],
+          ]
+        });
+
+        console.log(response.data);
+
+        if (response.data.length > 0) {
+          // Close the popup
+          setIsPopupOpen(false);
+
+          swal("Attendance taken successfully", {
+            icon: "success",
+          });
+
+          // Update the status of the event to "Checked In"
+          setEventList((prevEvents) =>
+            prevEvents.map((event) =>
+              event.eventId === selectedEventId ? { ...event, status: "Checked In" } : event
+            )
+          );
+          setIsSubmitting(false);
+        } else {
+          // Close the popup
+          setIsPopupOpen(false);
+
+          swal("Attendance taken unsuccessfully", {
+            icon: "error",
+          });
+          setIsSubmitting(false);
+        }
+      }
+      else {
+        setAttendanceCode("");
+        swal("Wrong code, please try again", {
+          icon: "error",
+        });
+        setIsSubmitting(false);
+      }
+    }
+  };
+
   return (
     <div className="mt-5 rounded-lg">
       <h2 className="text-3xl font-semibold text-black mt-5 mb-5">Volunteering Event Status</h2>
@@ -93,9 +193,18 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
                 <td className={`px-3 text-lg py-4 whitespace-nowrap pl-6 ${event.status === "Cancelled By Organiser" ? 'text-gray-400' : ''}`}>{event.name}</td>
                 <td className={`px-3 text-lg py-4 whitespace-nowrap pl-6 ${event.status === "Cancelled By Organiser" ? 'text-gray-400' : ''}`}>{event.formattedDateTime}</td>
                 <td className={`px-3 text-lg py-4 whitespace-nowrap pl-6 ${event.status === "Cancelled By Organiser" ? 'font-black' : ''}`}>
-                  <span className={`flex items-center justify-center px-4 text-lg leading-8 font-semibold rounded-md w-[120px] ${statusStyles[event.status]}`}>
-                    {event.status}
-                  </span>
+                  {event.status === "Check In" ? (
+                    <button
+                      className={`flex items-center justify-center px-4 text-lg leading-8 font-semibold rounded-md w-[120px] ${statusStyles[event.status]}`}
+                      onClick={() => handleCheckInClick(event)}
+                    >
+                      {event.status}
+                    </button>
+                  ) : (
+                    <span className={`flex items-center justify-center px-4 text-lg leading-8 font-semibold rounded-md w-[120px] ${statusStyles[event.status]}`}>
+                      {event.status}
+                    </span>
+                  )}
                 </td>
                 <td className={`px-3 text-lg py-4 whitespace-nowrap pl-6 ${event.status === "Cancelled By Organiser" ? 'text-gray-400' : ''}`}>{event.location}</td>
                 <td className="px-3 text-lg py-4 whitespace-nowrap relative">
@@ -144,7 +253,7 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
       </div>
       <div className="flex justify-between items-center">
         <span className="text-lg text-gray-500">
-          Showing {((currentPage - 1) * eventsPerPage) + 1} to {Math.min(currentPage * eventsPerPage, events.length)} of {events.length} entries
+          Showing {((currentPage - 1) * eventsPerPage) + 1} to {Math.min(currentPage * eventsPerPage, eventList.length)} of {eventList.length} entries
         </span>
         <div className="flex items-center space-x-2">
           <button
@@ -164,6 +273,37 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
           </button>
         </div>
       </div>
+      <ConfirmationModal
+        showModal={isPopupOpen}
+        closeModal={() => setIsPopupOpen(false)}
+        boxWidth="max-w-[400px]"
+      >
+        <h3 className="text-2xl font-semibold text-center mb-4 text-gray-700">
+          Enter Attendance Code
+        </h3>
+        <input
+          type="text"
+          value={attendanceCode}
+          onChange={(e) => setAttendanceCode(e.target.value)}
+          className="w-full px-4 py-2 border border-solid border-black rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter code here"
+        />
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={handlePopupSubmit}
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </button>
+          <button
+            onClick={() => setIsPopupOpen(false)}
+            className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </ConfirmationModal>
     </div>
   );
 }

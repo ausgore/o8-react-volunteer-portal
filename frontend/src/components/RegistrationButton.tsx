@@ -25,7 +25,7 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
         response = await CRM("Activity", "create", {
             values: [
                 ["activity_type_id:name", config.RegistrationActivityTypeName],
-                ["target_contact_id", [id]], // array possibly not accepted yet 
+                ["target_contact_id", [id]], 
                 ["source_contact_id", id],
                 ["subject", props.event.subject],
                 [`${config.RegistrationCustomFieldSetName}.event_activity_id`, props.event.id]
