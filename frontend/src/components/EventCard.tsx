@@ -19,8 +19,6 @@ export default function EventCard(props: EventCardProps) {
     const [thumbnail, setThumbnail] = useState<string>();
     const [volunteers, setVolunteers] = useState(0);
 
-    console.log(props.event);
-    
     useEffect(() => {
         (async () => {
             // Immmediately checking if there might be a thumbnail
