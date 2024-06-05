@@ -19,7 +19,6 @@ async function fetchProfileDetails(email: string) {
             "phone_primary.phone_numeric",
             "first_name",
             "last_name",
-            `${config.ProfileCustomFieldSetName}.*`
         ],
         where: [["email_primary.email", "=", email]]
     });
@@ -128,7 +127,6 @@ export default function Home() {
         (async function () {
             try {
                 const profile = await fetchProfileDetails(email);
-                console.log(profile);
                 setProfile(profile);
 
                 const allEventRegistration = await CRM('Activity', 'get', {
@@ -178,6 +176,8 @@ export default function Home() {
                 const transformedEvents = allDetails.map(({ status, details, attendance }: any) => {
                     let eventStatus = "";
                     const eventDate = new Date(details['activity_date_time']);
+                    const duration = details['duration'];
+                    const endDate = new Date(eventDate.getTime() + duration * 60000);
                     const now = new Date();
 
                     if (status['status_id:name'] === 'Cancelled') {
@@ -186,7 +186,13 @@ export default function Home() {
                         eventStatus = "Cancelled By Organiser";
                     } else if (now < eventDate) {
                         eventStatus = "Upcoming";
-                    } else {
+                    } else if (now >= eventDate && now <= endDate) {
+                        if (!attendance) {
+                            eventStatus = "Check In";
+                        } else {
+                            eventStatus = "Checked In";
+                        }
+                    } else if (now > endDate) {
                         if (!attendance) {
                             eventStatus = "No Show";
                         } else {
@@ -204,6 +210,7 @@ export default function Home() {
                         status: eventStatus,
                         location: details['location'],
                         eventId: details['id'],
+                        duration: details['duration'],
                     };
                 });
 
@@ -213,12 +220,17 @@ export default function Home() {
 
                 // Sort the events based on status and activity date time
                 const sortedEvents = transformedEvents.sort((a, b) => {
-                    const statusOrder = ["Upcoming", "No Show", "Cancelled", "Cancelled By Organiser", "Completed"];
+                    const statusOrder = ["Check In", "Checked In", "Upcoming", "No Show", "Cancelled", "Cancelled By Organiser", "Completed"];
                     const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
                     if (statusComparison !== 0) {
                         return statusComparison;
                     }
-                    return new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
+
+                    if ((a.status === "Upcoming" && b.status === "Upcoming") || (a.status === "Check In" && b.status === "Check In") || (a.status === "Checked In" && b.status === "Checked In")) {
+                        return new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
+                    }
+
+                    return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
                 });
 
                 setVolunteeredEvents(sortedEvents);
@@ -253,9 +265,11 @@ export default function Home() {
                     )
                 );
             } else {
+                setShowCancelModal(false);
                 swal("Event cancellation failed", {
                     icon: "error",
                 });
+                setIsCancelling(false);
             }
         }
     };
