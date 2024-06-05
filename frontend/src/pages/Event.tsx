@@ -10,6 +10,7 @@ import moment from "moment";
 import { CustomField } from "../typings/types";
 import config from "../../../config";
 import { CiFileOff } from "react-icons/ci";
+import { IoMdBriefcase } from "react-icons/io";
 import Loading from "../components/Loading";
 import RegistrationButton from "../components/RegistrationButton";
 
@@ -33,6 +34,7 @@ export default function Event() {
                 select: [
                     "activity_type_id:name",
                     `${config.EventCustomFieldSetName}.*`,
+                    `${config.EventCustomFieldSetName}.role:label`,
                     "subject",
                     "details",
                     "location",
@@ -102,7 +104,7 @@ export default function Event() {
 
     return <Wrapper>
         {!event ? <Loading className="h-screen items-center" /> : <div className="p-4">
-            <h1>Event Details</h1>
+            <h1 className="font-semibold text-lg text-gray-600">Event Details</h1>
             <div className="bg-white rounded-md mt-4 py-6 px-4 max-w-[1200px]">
                 {/* Image */}
                 <div className="mb-8 h-[200px] rounded-lg relative bg-gray-200">
@@ -163,8 +165,8 @@ export default function Event() {
                     {event[`${config.EventCustomFieldSetName}.role`] && <div className="bg-primary/30 text-secondary rounded-md py-2 px-3 col-span-4 lg:col-span-2">
                         <h3 className="text-xs font-semibold mb-2">Role</h3>
                         <div className="flex flex-row items-center gap-x-3 font-bold text-sm">
-                            <GrLocation size={22} />
-                            <span>{event[`${config.EventCustomFieldSetName}.role`]}</span>
+                            <IoMdBriefcase size={22} />
+                            <span>{event[`${config.EventCustomFieldSetName}.role:label`]}</span>
                         </div>
                     </div>}
                 </div>

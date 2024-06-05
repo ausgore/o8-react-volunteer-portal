@@ -72,6 +72,7 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
   };
 
   const navigate = useNavigate();
+  console.log(event);
 
   return (
     <div className="mt-5 rounded-lg">

@@ -127,6 +127,7 @@ export default function Events() {
             select: [
                 "activity_type_id:name",
                 `${config.EventCustomFieldSetName}.*`,
+                `${config.EventCustomFieldSetName}.role:label`,
                 "subject",
                 "location",
                 "activity_date_time",

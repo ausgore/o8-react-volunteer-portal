@@ -7,6 +7,7 @@ import CRM from "../../crm";
 import config from "../../../config";
 import { CiFileOff } from "react-icons/ci";
 import { Spinner } from "flowbite-react";
+import { IoBriefcaseOutline } from "react-icons/io5";
 
 interface EventCardProps {
     event: any;
@@ -79,6 +80,11 @@ export default function EventCard(props: EventCardProps) {
                     <div className="gap-x-3 flex items-center">
                         <GrLocation className="text-secondary" />
                         <span className="text-sm font-semibold">{props.event.location}</span>
+                    </div>
+                    {/* Role */}
+                    <div className="gap-x-3 flex items-center">
+                        <IoBriefcaseOutline className="text-secondary" />
+                        <span className="text-sm font-semibold">{props.event[`${config.EventCustomFieldSetName}.role:label`]}</span>
                     </div>
                     {/* People */}
                     <div className="gap-x-3 flex items-center">
