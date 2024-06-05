@@ -103,6 +103,7 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
   };
 
   const navigate = useNavigate();
+  console.log(event);
 
   const handleCheckInClick = (event: Event) => {
     setSelectedEventId(event.eventId);

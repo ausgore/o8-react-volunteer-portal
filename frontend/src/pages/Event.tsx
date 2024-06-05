@@ -10,6 +10,7 @@ import moment from "moment";
 import { CustomField } from "../typings/types";
 import config from "../../../config";
 import { CiFileOff } from "react-icons/ci";
+import { IoMdBriefcase } from "react-icons/io";
 import Loading from "../components/Loading";
 import RegistrationButton from "../components/RegistrationButton";
 
@@ -33,6 +34,7 @@ export default function Event() {
                 select: [
                     "activity_type_id:name",
                     `${config.EventCustomFieldSetName}.*`,
+                    `${config.EventCustomFieldSetName}.role:label`,
                     "subject",
                     "details",
                     "location",
@@ -96,13 +98,13 @@ export default function Event() {
             ],
         });
         setVolunteers(response.data);
-        
+
         return response.data;
     }
 
     return <Wrapper>
         {!event ? <Loading className="h-screen items-center" /> : <div className="p-4">
-            <h1>Event Details</h1>
+            <h1 className="font-semibold text-lg text-gray-600">Event Details</h1>
             <div className="bg-white rounded-md mt-4 py-6 px-4 max-w-[1200px]">
                 {/* Image */}
                 <div className="mb-8 h-[200px] rounded-lg relative bg-gray-200">
@@ -119,16 +121,16 @@ export default function Event() {
                         {event.details?.length > 0 && <div className="max-w-[780px] mt-4 text-black/70" dangerouslySetInnerHTML={{ __html: event.details }} />}
                     </div>
                     {/* Sign up */}
-                    <div className="text-center max-w-[180px]">
+                    <div className="text-center max-w-[180px] hidden sm:block">
                         <RegistrationButton volunteers={volunteers} event={event} updateVolunteers={updateVolunteers}> Sign Up </RegistrationButton>
                         {/* Registration deadline */}
                         <p className="text-xs">Registration: {moment(event[`${config.EventCustomFieldSetName}.registration_start`]).format("DD MMMM")} - {moment(event[`${config.EventCustomFieldSetName}.registration_end`]).format("DD MMMM")}</p>
                     </div>
                 </header>
                 {/* Informations */}
-                <div className="grid grid-cols-2 lg:flex lg:flex-row gap-3 w-full mt-6 max-w-[800px]">
+                <div className="grid grid-cols-4 lg:flex lg:flex-row gap-4 w-full mt-6">
                     {/* People attending */}
-                    <div className="bg-primary/30 min-w-[135px] text-secondary rounded-md py-2 px-3">
+                    <div className="bg-primary/30 min-w-[135px] text-secondary rounded-md py-2 px-3 col-span-2">
                         <h3 className="text-xs font-semibold mb-2">People Attending</h3>
                         <div className="flex flex-row items-center gap-x-3 font-bold text-lg">
                             <MdPeopleAlt size={22} />
@@ -140,7 +142,7 @@ export default function Event() {
                         </div>
                     </div>
                     {/* Location */}
-                    <div className="bg-primary/30 text-secondary rounded-md py-2 px-3">
+                    <div className="bg-primary/30 text-secondary rounded-md py-2 px-3 col-span-2">
                         <h3 className="text-xs font-semibold mb-2">Location</h3>
                         <div className="flex flex-row items-center gap-x-3 font-bold text-sm">
                             <GrLocation size={22} />
@@ -148,17 +150,25 @@ export default function Event() {
                         </div>
                     </div>
                     {/* Duration */}
-                    <div className="bg-primary/30 text-secondary rounded-md py-2 px-3 flex-grow col-span-2">
+                    <div className="bg-primary/30 text-secondary rounded-md py-2 px-3 col-span-4 lg:col-span-2">
                         <h3 className="text-xs font-semibold mb-2">Event Duration</h3>
-                        <div className="flex flex-row items-center gap-x-3 font-bold text-sm">
+                        <div className="flex flex-row items-center gap-x-3 font-bold text-sm ">
                             <FiCalendar size={22} />
-                            <span>
-                                {moment(event.activity_date_time).format("D MMM YYYY, h:mm A")}
-                                <span className="font-normal mx-4">-</span>
-                                {moment(new Date(event.activity_date_time).getTime() + (event.duration * 60 * 1000)).format("D MMM YYYY, h:mm A")}
-                            </span>
+                            <div className="flex flex-col sm:flex-row gap-x-3">
+                                <span>{moment(event.activity_date_time).format("D MMM YYYY, h:mm A")}</span>
+                                <span className="hidden sm:block">-</span>
+                                <span>{moment(new Date(event.activity_date_time).getTime() + (event.duration * 60 * 1000)).format("D MMM YYYY, h:mm A")}</span>
+                            </div>
                         </div>
                     </div>
+                    {/* Role */}
+                    {event[`${config.EventCustomFieldSetName}.role`] && <div className="bg-primary/30 text-secondary rounded-md py-2 px-3 col-span-4 lg:col-span-2">
+                        <h3 className="text-xs font-semibold mb-2">Role</h3>
+                        <div className="flex flex-row items-center gap-x-3 font-bold text-sm">
+                            <IoMdBriefcase size={22} />
+                            <span>{event[`${config.EventCustomFieldSetName}.role:label`]}</span>
+                        </div>
+                    </div>}
                 </div>
                 {/* Custom Fields */}
                 <div className="mt-6">
