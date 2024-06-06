@@ -94,6 +94,7 @@ export default function Event() {
             ],
             where: [
                 [`${config.RegistrationCustomFieldSetName}.event_activity_id`, '=', id],
+                ["status_id:name", "=", "Cancelled"]
                 // ["contact.email_primary.email", "=", email]
             ],
         });
