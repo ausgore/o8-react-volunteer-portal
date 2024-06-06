@@ -20,7 +20,7 @@ export default function Navbar(props: NavbarProps) {
     const signOut = async () => {
         setIsSigningOut(true);
         await axios.get(`${config.domain}/portal/api/logout.php`);
-        window.location.href = `${window.location.protocol}//${config.domain}/wp-login.php?redirect_to=${encodeURIComponent(window.location.href)}`;
+        window.location.href = `${config.domain}/wp-login.php?redirect_to=${encodeURIComponent(window.location.href)}`;
     }
 
     const [showModal, setShowModal] = useState(false);
