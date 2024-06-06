@@ -34,7 +34,7 @@ export default function EventCard(props: EventCardProps) {
                 select: ['id'],
                 where: [
                     [`${config.RegistrationCustomFieldSetName}.event_activity_id`, '=', props.event.id],
-                    ["status_id:name", "=", "Cancelled"]
+                    ["status_id:name", "!=", "Cancelled"]
                 ],
             });
             setVolunteers(response.data.length);
