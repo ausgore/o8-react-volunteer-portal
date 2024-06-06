@@ -31,9 +31,10 @@ export default function EventCard(props: EventCardProps) {
             // });
             
             const response = await CRM("Activity", "get", {
-                select: ['id',],
+                select: ['id'],
                 where: [
                     [`${config.RegistrationCustomFieldSetName}.event_activity_id`, '=', props.event.id],
+                    ["status_id:name", "!=", "Cancelled"]
                 ],
             });
             setVolunteers(response.data.length);

@@ -80,8 +80,8 @@ async function getUnvolunteeredEvents(volunteeredActivitiesArr: number[]) {
             "location",
             "activity_date_time",
             "duration",
-            config.EventCustomFieldSetName + ".role",
-            config.EventCustomFieldSetName + ".vacancy",
+            `${config.EventCustomFieldSetName}.*`,
+            `${config.EventCustomFieldSetName}.role:label`
         ],
         where: [
             ["activity_type_id:name", "=", config.EventActivityTypeName],
