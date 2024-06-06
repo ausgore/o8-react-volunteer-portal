@@ -215,7 +215,7 @@ export default function Events() {
                             {/* Mandatory Custom Fields */}
                             {customFields && mandatoryFilters.map((name, index) => {
                                 const field = customFields[`${config.EventCustomFieldSetName}.${name}`];
-                                return <Dropdown label={field.label.charAt(0).toUpperCase() + field.label.slice(1)}>
+                                return !(!field) && <Dropdown label={field.label.charAt(0).toUpperCase() + field.label.slice(1)}>
                                     <div className={`absolute bg-white shadow-md rounded-md w-full min-w-[200px] mt-2 z-20 ${index == mandatoryFilters.length - 1 ? "right-0" : "left-0"}`}>
                                         {/* For ecah option */}
                                         {field.options.map((opt: any) => <div className="in-line px-4 py-2 items-center gapx-3 cursor-pointer hover:bg-gray-100" onClick={() => updateSelection(`${config.EventCustomFieldSetName}.${name}`, opt)}>
