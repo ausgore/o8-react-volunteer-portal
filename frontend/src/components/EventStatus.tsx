@@ -113,13 +113,12 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
 
   const handlePopupSubmit = async () => {
     if (selectedEventId !== null) {
+      setAttendanceCode("");
       setIsSubmitting(true);
       console.log("Attendance code submitted:", attendanceCode, "for event ID:", selectedEventId);
       const result = await checkAttendanceCode(selectedEventId, attendanceCode);
       console.log(result);
       if (result.length > 0) {
-        setAttendanceCode("");
-
         let response = await CRM("Contact", "get", {
           select: ["id"],
           where: [["email_primary.email", "=", email]]
@@ -165,7 +164,6 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
         }
       }
       else {
-        setAttendanceCode("");
         swal("Wrong code, please try again", {
           icon: "error",
         });

@@ -146,7 +146,6 @@ export default function SecondProfile() {
             <div className="mb-24">
                 {/* Header */}
                 <div className="p-4 relative bg-primary/20 h-[140px]">
-                    <h1 className="font-semibold text-lg text-gray-600">Profile</h1>
                     <div className="flex flex-row items-center absolute -bottom-[44%] lg:left-20">
                         {/* Profile picture */}
                         <div className="w-[130px] h-[130px] rounded-full bg-gray-300 mr-6 border-[#f4f5fb] border-8">
