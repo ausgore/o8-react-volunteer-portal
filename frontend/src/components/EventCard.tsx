@@ -33,7 +33,7 @@ export default function EventCard(props: EventCardProps) {
             const response = await CRM("Activity", "get", {
                 select: ['id',],
                 where: [
-                    ['participation_details.event_activity_id', '=', props.event.id],
+                    [`${config.RegistrationCustomFieldSetName}.event_activity_id`, '=', props.event.id],
                 ],
             });
             setVolunteers(response.data.length);
