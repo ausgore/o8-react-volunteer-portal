@@ -93,8 +93,7 @@ export default function Event() {
                 ["Contact AS contact", "LEFT", ["target_contact_id", "=", "contact.id"]]
             ],
             where: [
-                [`${config.RegistrationCustomFieldSetName}.event_activity_id`, '=', id],
-                ["status_id:name", "=", "Cancelled"]
+                [`${config.RegistrationCustomFieldSetName}.event_activity_id`, '=', id]
                 // ["contact.email_primary.email", "=", email]
             ],
         });

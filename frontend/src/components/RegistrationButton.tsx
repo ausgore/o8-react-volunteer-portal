@@ -1,4 +1,4 @@
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import config from "../../../config";
 import CRM from "../../crm";
 import swal from "sweetalert";
@@ -10,7 +10,6 @@ interface RegistrationButtonProps extends PropsWithChildren {
 }
 
 export default function RegistrationButton(props: RegistrationButtonProps) {
-    console.log(props.event, props.volunteers)
     const email = (window as any).email as string ?? config.email;
     const [isLoading, setIsLoading] = useState(false);
     const handleClick = async () => {
@@ -42,15 +41,14 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
         else {
             swal("Some error occurred while registering.\nPlease contact an administrator.", {
                 icon: "error"
-            },)
+            })
         }
         setIsLoading(false);
     }
 
     const registered = props.volunteers.find(v => v["contact.email_primary.email"] == email) ?? null;
     const withinRegistration = Date.now() >= new Date(props.event[`${config.EventCustomFieldSetName}.registration_start`]).getTime() && Date.now() <= new Date(props.event[`${config.EventCustomFieldSetName}.registration_end`]).getTime();
-    const hasSpace = /*props.event[`${config.EventCustomFieldSetName}.vacancy`] ? */props.volunteers >= props.event[`${config.EventCustomFieldSetName}.vacancy`] ? false : true;
-    console.log(registered, withinRegistration, hasSpace);
+    const hasSpace = /*props.event[`${config.EventCustomFieldSetName}.vacancy`] ? */props.volunteers.filter(v => v["status_id:name"] != "Cancelled") >= props.event[`${config.EventCustomFieldSetName}.vacancy`] ? false : true;
     // If the user already registrered
     // if (props.volunteers.map(v => v["contact.email_primary.email"]))
 
