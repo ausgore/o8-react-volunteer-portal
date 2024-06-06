@@ -14,7 +14,7 @@ import { IoMdBriefcase } from "react-icons/io";
 import Loading from "../components/Loading";
 import RegistrationButton from "../components/RegistrationButton";
 
-const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail"]
+const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail", "region", "category", "role", "attendance_code"]
 
 export default function Event() {
     const { id } = useParams();
@@ -173,7 +173,7 @@ export default function Event() {
                 {/* Custom Fields */}
                 <div className="mt-6">
                     {customFields && Object.values(customFields).map(field => {
-                        return <div className="mb-6">
+                        return !presetCustomFields.includes(field.name) && <div className="mb-6">
                             <h1 className="font-bold mb-2 text-black/70">{field.label}</h1>
                             <p className="text-black/70">{event[`${config.EventCustomFieldSetName}.${field.name}`]}</p>
                         </div>
