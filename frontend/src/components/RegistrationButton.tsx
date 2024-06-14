@@ -9,6 +9,8 @@ interface RegistrationButtonProps extends PropsWithChildren {
     updateVolunteers: () => Promise<any[]>;
 }
 
+const approvalRequiredCustomField = "approvalRequired";
+
 export default function RegistrationButton(props: RegistrationButtonProps) {
     const email = (window as any).email as string ?? config.email;
     const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +30,7 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
                 ["target_contact_id", [id]], 
                 ["source_contact_id", id],
                 ["subject", props.event.subject],
-                ["status_id", props.event[`${config.EventCustomFieldSetName}.approvalRequired`] ? 1 : 7],
+                ["status_id", props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] ? 1 : 7],
                 [`${config.RegistrationCustomFieldSetName}.event_activity_id`, props.event.id]
             ]
         });
@@ -36,7 +38,7 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
         const volunteers = await props.updateVolunteers();
 
         if (volunteers.find(v => v["contact.email_primary.email"] == email)) {
-            swal(props.event[`${config.EventCustomFieldSetName}.approvalRequired`] ? `You have requested an approval to register for ${props.event.subject}!` : `You have registered for ${props.event.subject}!`, {
+            swal(props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] ? `You have requested an approval to register for ${props.event.subject}!` : `You have registered for ${props.event.subject}!`, {
                 icon: "success",
             })
         }
