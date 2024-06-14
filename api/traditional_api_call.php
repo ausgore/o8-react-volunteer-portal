@@ -9,6 +9,11 @@ if (strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
     $query = $_POST;
 }
 
+// $key = "iloveo8";
+// $iv = "8f3f2f0355c37b7d1dd81965dbd0516f";
+// $encryption = $query=['encryption'];
+// $decryptedString = openssl_decrypt(base64_decode($encryption), "AES-256-CBC", $key, 0, hex2bin($iv));
+
 // Specific params variables
 $entity = $query['entity'];
 $action = $query['action'];
