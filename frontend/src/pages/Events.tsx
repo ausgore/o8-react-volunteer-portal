@@ -136,7 +136,7 @@ export default function Events() {
             ],
             where,
         });
-        const events = response.data;
+        const events = response.data.sort((a: any, b: any) => new Date(b.activity_date_time).getTime() - new Date(a.activity_date_time).getTime());
         setEvents(events);
     }
 
@@ -240,6 +240,9 @@ export default function Events() {
                         {events.map((event: any) => <EventCard className="flex justify-center" event={event} />)}
                     </div>}
                 </>}
+                <div>
+                    Page 1
+                </div>
             </div>
         </div>}
     </Wrapper>
