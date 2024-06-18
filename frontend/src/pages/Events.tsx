@@ -11,6 +11,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import ReactDatePicker from "react-datepicker";
 import moment from "moment";
 
+const entitiesPerPage = 6;
 const mandatoryFilters = ["region", "category", "role"];
 
 export default function Events() {
@@ -19,6 +20,7 @@ export default function Events() {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [customFields, setCustomFields] = useState<any>();
+    const [totalPages, setTotalPages] = useState(0);
 
     const email = (window as any).email ?? config.email;
 
@@ -36,7 +38,7 @@ export default function Events() {
                 select: ["label", "value", "name", "option_group_id"],
                 where: [["option_group_id", "IN", optionGroupIds]]
             });
-            
+
             // Getting user custom fields with optionGroupId
             response = await CRM("CustomField", "get", {
                 select: ["name", "html_type", "option_group_id"],
@@ -102,6 +104,7 @@ export default function Events() {
     const updateEvents = async () => {
         setEvents(null);
 
+        // Filter handling
         const where: [string, ComparisonOperator, any?][] = [["activity_type_id:name", "=", config.EventActivityTypeName]];
         const search = searchParams.get("search");
         if (search) where.push(["subject", "CONTAINS", search]);
@@ -119,8 +122,20 @@ export default function Events() {
 
         for (const key of searchParams.keys())
             if (key.startsWith(config.EventCustomFieldSetName))
-                where.push([key, "IN", JSON.parse(searchParams.get(key) ?? "[]")])
+                where.push([key, "IN", JSON.parse(searchParams.get(key) ?? "[]")]);
+        // Filter handling
 
+
+        // Getting the total number of pages
+        const total = await CRM("Activity", "get", {
+            select: ["id"],
+            where: [["activity_type_id:name", "=", config.EventActivityTypeName], ...where]
+        });
+        const totalPages = Math.round(total.data.length / entitiesPerPage);
+        setTotalPages(totalPages);
+        let page = parseInt(searchParams.get("page") ?? "1") - 1;
+        if (page > totalPages - 1) page = totalPages - 1;
+        if (page < 0) page = 0;
 
         // Fetch all events
         let response = await CRM("Activity", "get", {
@@ -132,9 +147,12 @@ export default function Events() {
                 "location",
                 "activity_date_time",
                 "duration",
-                "status_id:name"
+                "status_id:name",
             ],
             where,
+            offset: page * entitiesPerPage,
+            limit: entitiesPerPage,
+            order: [["activity_date_time", "DESC"]]
         });
         const events = response.data;
         setEvents(events);
@@ -147,6 +165,8 @@ export default function Events() {
 
         if (!selected.length) searchParams.delete(selection);
         else searchParams.set(selection, JSON.stringify(selected));
+
+        searchParams.set("page", "1");
         setSearchParams(searchParams);
     }
 
@@ -229,7 +249,7 @@ export default function Events() {
                     </div>
                     {/* For other custom selectable custom fields because i don't know how to deal with this */}
                     {/* If there are more filters that isn't just the search in the search param */}
-                    {Array.from(searchParams.keys()).length > 0
+                    {Array.from(searchParams.keys()).filter(s => s != "page").length > 0
                         && <button onClick={clearFilters} className="text-sm text-secondary text-left">Clear Filters</button>}
                 </div>
                 {/* Event cards */}
@@ -239,6 +259,12 @@ export default function Events() {
                     {events.length > 0 && <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
                         {events.map((event: any) => <EventCard className="flex justify-center" event={event} />)}
                     </div>}
+                    {totalPages > 1 && <div className="mt-8 items-center justify-center text-center w-full">
+                    {Array.from({ length: totalPages }).map((_, n) => <button onClick={() => {
+                        searchParams.set("page", `${n + 1}`);
+                        setSearchParams(searchParams);
+                    }} className="px-3 py-1 rounded-md hover:bg-secondary hover:text-white mx-1 font-semibold text-gray-600">{n + 1}</button>)}
+                </div>}
                 </>}
             </div>
         </div>}

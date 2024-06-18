@@ -7,8 +7,9 @@ interface ParamProps {
     select?: string[];
     limit?: number;
     where?: [string, ComparisonOperator, any?][];
-    order?: any[],
-    values?: [string, any][]
+    order?: [string, "ASC" | "DESC"][];
+    values?: [string, any][];
+    offset?: number;
     join?: [string, string, [string, ComparisonOperator, any?]][];
 }
 
@@ -18,6 +19,7 @@ export default async function CRM(entity: string, action: string, params?: Param
     // const encryption = CryptoJS.AES.encrypt(JSON.stringify({ entity, action, ...params }), key, { iv: iv as any });
 
     const url = `${config.domain}/portal/api/traditional_api_call.php`;
+    console.log(params);
     const result = await axios.post(url, {
         entity, action, ...params
     }).catch(console.log) as AxiosResponse<any, any>

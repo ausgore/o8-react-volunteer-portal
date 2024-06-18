@@ -23,6 +23,7 @@ $where = $query['where'] ?? array();
 $order = $query['order'] ?? array();
 $values = $query['values'] ?? array();
 $limit = $query['limit'] ?? null;
+$offset = $query['offset'] ?? null;
 
 // Initializing default params value
 $params = array(
@@ -52,6 +53,9 @@ if (is_array($values) && !empty($values)) {
 }
 if ($limit != null) {
     $params['limit'] = $limit;
+}
+if ($offset != null) {
+    $params['offset'] = $offset;
 }
 
 $result = civicrm_api4($entity, $action, $params);
