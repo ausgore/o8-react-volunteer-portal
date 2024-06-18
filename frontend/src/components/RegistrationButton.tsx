@@ -9,7 +9,7 @@ interface RegistrationButtonProps extends PropsWithChildren {
     updateVolunteers: () => Promise<any[]>;
 }
 
-const approvalRequiredCustomField = "approvalRequired";
+const approvalRequiredCustomField = "approval_requried";
 
 export default function RegistrationButton(props: RegistrationButtonProps) {
     const email = (window as any).email as string ?? config.email;
