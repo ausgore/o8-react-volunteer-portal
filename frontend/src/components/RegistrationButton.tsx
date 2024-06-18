@@ -9,24 +9,28 @@ interface RegistrationButtonProps extends PropsWithChildren {
     updateVolunteers: () => Promise<any[]>;
 }
 
+const approvalRequiredCustomField = "approval_requried";
+
 export default function RegistrationButton(props: RegistrationButtonProps) {
     const email = (window as any).email as string ?? config.email;
     const [isLoading, setIsLoading] = useState(false);
     const handleClick = async () => {
         setIsLoading(true);
+        // Getting the contact's id
         let response = await CRM("Contact", "get", {
             select: ["id"],
             where: [["email_primary.email", "=", email]]
         });
         const { id } = response.data[0];
 
-        // Creating the Participation Activity
+        // Creating the Registration Activity
         response = await CRM("Activity", "create", {
             values: [
                 ["activity_type_id:name", config.RegistrationActivityTypeName],
                 ["target_contact_id", [id]], 
                 ["source_contact_id", id],
                 ["subject", props.event.subject],
+                ["status_id", props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] ? 1 : 7],
                 [`${config.RegistrationCustomFieldSetName}.event_activity_id`, props.event.id]
             ]
         });
@@ -34,7 +38,7 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
         const volunteers = await props.updateVolunteers();
 
         if (volunteers.find(v => v["contact.email_primary.email"] == email)) {
-            swal(`You have registered for ${props.event.subject}!`, {
+            swal(props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] ? `You have requested an approval to register for ${props.event.subject}!` : `You have registered for ${props.event.subject}!`, {
                 icon: "success",
             })
         }
@@ -56,7 +60,7 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
         {/* {!(!registered) && (registered["status_id:name"] == "Cancelled" ? "Cancelled" : "Registered")}
         {!registered && (!withinRegistration || !hasSpace) && "Closed"} */}
         {isLoading ? "Loading..." : registered
-            ? (registered["status_id:name"] === "Cancelled" ? "Cancelled" : "Registered")
+            ? (registered["status_id:name"] === "Cancelled" ? "Cancelled" : registered["status_id:name"] == "Scheduled" ? "Pending" : "Registered")
             : (!withinRegistration || !hasSpace ? "Closed" : "Sign Up")}
     </button>
 }
