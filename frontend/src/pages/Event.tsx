@@ -14,7 +14,7 @@ import { IoMdBriefcase } from "react-icons/io";
 import Loading from "../components/Loading";
 import RegistrationButton from "../components/RegistrationButton";
 
-const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail", "region", "category", "role", "attendance_code"]
+const presetCustomFields = ["registration_start", "registration_end", "vacancy", "thumbnail", "region", "category", "role", "attendance_code", "approval_required"]
 
 export default function Event() {
     const { id } = useParams();
