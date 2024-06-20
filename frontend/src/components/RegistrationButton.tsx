@@ -9,7 +9,7 @@ interface RegistrationButtonProps extends PropsWithChildren {
     updateVolunteers: () => Promise<any[]>;
 }
 
-const approvalRequiredCustomField = "approval_requried";
+const approvalRequiredCustomField = "approval_required";
 
 export default function RegistrationButton(props: RegistrationButtonProps) {
     const email = (window as any).email as string ?? config.email;
@@ -30,7 +30,7 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
                 ["target_contact_id", [id]], 
                 ["source_contact_id", id],
                 ["subject", props.event.subject],
-                ["status_id", props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] ? 1 : 7],
+                ["status_id:name", props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] ? "Approval Required" : "Completed"],
                 [`${config.RegistrationCustomFieldSetName}.event_activity_id`, props.event.id]
             ]
         });
@@ -60,7 +60,7 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
         {/* {!(!registered) && (registered["status_id:name"] == "Cancelled" ? "Cancelled" : "Registered")}
         {!registered && (!withinRegistration || !hasSpace) && "Closed"} */}
         {isLoading ? "Loading..." : registered
-            ? (registered["status_id:name"] === "Cancelled" ? "Cancelled" : registered["status_id:name"] == "Scheduled" ? "Pending" : "Registered")
+            ? (registered["status_id:name"] === "Cancelled" ? "Cancelled" : registered["status_id:name"] == "Approval Required" ? "Pending" : "Registered")
             : (!withinRegistration || !hasSpace ? "Closed" : "Sign Up")}
     </button>
 }
