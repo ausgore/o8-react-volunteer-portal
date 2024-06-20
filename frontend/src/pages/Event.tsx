@@ -106,7 +106,7 @@ export default function Event() {
     return <Wrapper>
         {!event ? <Loading className="h-screen items-center" /> : <div className="p-4">
             <h1 className="font-semibold text-lg text-gray-600">Event Details</h1>
-            <div className="bg-white rounded-md mt-4 py-6 px-4 max-w-[1200px]">
+            <div className="bg-white rounded-md mt-4 py-6 px-4 max-w-[1400px]">
                 {/* Image */}
                 <div className="mb-8 h-[200px] rounded-lg relative bg-gray-200">
                     {thumbnail && <img src={thumbnail} className="w-full h-full object-cover rounded-lg" />}
