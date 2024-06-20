@@ -18,26 +18,26 @@ const config: ConfigProps = {
     // Test email
     email: "",
     // The custom field set used for the profile
-    ProfileCustomFieldSetName: "",
+    ProfileCustomFieldSetName: "volunteer_profile",
 
     // The activity type name for created events
-    EventActivityTypeName: "",
+    EventActivityTypeName: "Volunteer Event",
     // The custom field set used for the event
-    EventCustomFieldSetName: "",
+    EventCustomFieldSetName: "event_details",
     // The activity type name for event roles per event
     EventRoleActivityTypeName: "",
     // The custom field set used for the event role
     EventRoleCustomFieldSetName: "",
 
     // The activity type name for registering for an event
-    RegistrationActivityTypeName: "",
+    RegistrationActivityTypeName: "Volunteer Event Participation",
     // The custom field set used for registration
-    RegistrationCustomFieldSetName: "",
+    RegistrationCustomFieldSetName: "participation_details",
 
     // The activity type name for logging your attendance in an event
-    LoggingAttendanceActivityTypeName: "",
+    LoggingAttendanceActivityTypeName: "Volunteer Event Attendance",
     // The custom field set used for logging attendance
-    LoggingAttendanceCustomFieldSetName: ""
+    LoggingAttendanceCustomFieldSetName: "attendance_details"
 };
 
 export default config;
