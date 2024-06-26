@@ -44,13 +44,14 @@ export default function EventStatus({ events, openCancelModal }: EventStatusProp
 
   const statusStyles: { [key: string]: string } = {
     "Upcoming": "bg-[#FFB656] text-white",
-    "Pending": "bg-[#FFB656] text-white",
+    "Pending": "bg-[#F0D202] text-white",
     "Check In": "bg-[#57D5FF] text-white",
     "No Show": "bg-gray-400 text-white",
     "Cancelled": "bg-[#F26A6A] text-white",
     "Completed": "bg-[#7BCF72] text-white",
     "Cancelled By Organiser": "bg-gray-200 text-[#F26A6A]",
     "Checked In": "bg-[#5A71B4] text-white",
+    "Unapproved": "bg-[#EFB7C0] text-white",
   };
 
   const [currentPage, setCurrentPage] = useState(1);

@@ -27,10 +27,10 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
         response = await CRM("Activity", "create", {
             values: [
                 ["activity_type_id:name", config.RegistrationActivityTypeName],
-                ["target_contact_id", [id]], 
+                ["target_contact_id", [id]],
                 ["source_contact_id", id],
                 ["subject", props.event.subject],
-                ["status_id:name", props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] ? "Approval Required" : "Completed"],
+                ["status_id:name", (props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] === 1) ? "Approval Required" : "Completed"],
                 [`${config.RegistrationCustomFieldSetName}.event_activity_id`, props.event.id]
             ]
         });
@@ -38,7 +38,7 @@ export default function RegistrationButton(props: RegistrationButtonProps) {
         const volunteers = await props.updateVolunteers();
 
         if (volunteers.find(v => v["contact.email_primary.email"] == email)) {
-            swal(props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] ? `You have requested an approval to register for ${props.event.subject}!` : `You have registered for ${props.event.subject}!`, {
+            swal((props.event[`${config.EventCustomFieldSetName}.${approvalRequiredCustomField}`] === 1) ? `You have requested an approval to register for ${props.event.subject}!` : `You have registered for ${props.event.subject}!`, {
                 icon: "success",
             })
         }
