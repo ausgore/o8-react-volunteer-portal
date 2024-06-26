@@ -186,7 +186,8 @@ export default function Home() {
                     } else if (details['status_id:name'] === 'Cancelled') {
                         eventStatus = "Cancelled By Organiser";
                     } else if (now < eventDate) {
-                        if (status["status_id:name"] == "Approval Required") eventStatus = "Pending Approval";
+                        if (status["status_id:name"] == "Approval Required") eventStatus = "Pending";
+                        else if(status["status_id:name"] == "Not Approved") eventStatus = "Unapproved";
                         else eventStatus = "Upcoming";
                     } else if (now >= eventDate && now <= endDate) {
                         if (!attendance) {
@@ -222,7 +223,7 @@ export default function Home() {
 
                 // Sort the events based on status and activity date time
                 const sortedEvents = transformedEvents.sort((a, b) => {
-                    const statusOrder = ["Check In", "Checked In", "Upcoming", "Pending", "No Show", "Cancelled", "Cancelled By Organiser", "Completed"];
+                    const statusOrder = ["Check In", "Checked In", "Upcoming", "Pending", "Unapproved", "No Show", "Cancelled", "Cancelled By Organiser", "Completed"];
                     const statusComparison = statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
                     if (statusComparison !== 0) {
                         return statusComparison;
