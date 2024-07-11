@@ -7,7 +7,7 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 import { createSearchParams, useSearchParams } from "react-router-dom";
 import Loading from "../components/Loading";
 import Dropdown from "../components/Dropdown";
-import "react-datepicker/dist/react-datepicker.css";
+
 import ReactDatePicker from "react-datepicker";
 import moment from "moment";
 
@@ -38,7 +38,7 @@ export default function Events() {
                 select: ["label", "value", "name", "option_group_id"],
                 where: [["option_group_id", "IN", optionGroupIds]]
             });
-
+            
             // Getting user custom fields with optionGroupId
             response = await CRM("CustomField", "get", {
                 select: ["name", "html_type", "option_group_id"],
@@ -72,7 +72,7 @@ export default function Events() {
             // Getting and setting the custom fields which have options
             const customFields: any = {};
             for (const field of eventCustomFields) {
-                if (field.option_group_id) {
+                if (field.option_group_id) {    
                     customFields[`${config.EventCustomFieldSetName}.${field.name}`] = {
                         label: field.label,
                         name: field.name,
@@ -108,7 +108,7 @@ export default function Events() {
         const where: [string, ComparisonOperator, any?][] = [["activity_type_id:name", "=", config.EventActivityTypeName]];
         const search = searchParams.get("search");
         if (search) where.push(["subject", "CONTAINS", search]);
-
+ 
         let startDate, endDate;
         if (searchParams.has("date")) startDate = new Date(JSON.parse(searchParams.get("date") as string));
         if (searchParams.has("endDate")) endDate = new Date(JSON.parse(searchParams.get("endDate") as string));
@@ -178,7 +178,7 @@ export default function Events() {
 
     const clearDateAndTimeFilters = (keys: string[]) => {
         for (const key of keys) searchParams.delete(key);
-        setSearchParams(searchParams);
+        setSearchParams(searchParams);  
     }
 
     const clearFilters = () => {
@@ -197,7 +197,7 @@ export default function Events() {
                             <input type="text" placeholder="Search" className="py-2 px-4 pr-12 rounded-lg w-full outline-none" value={search} onChange={e => setSearch(e.target.value)} onKeyDown={handleSearch} />
                             <FaMagnifyingGlass className="text-gray-500 absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" />
                         </div>
-                        <div className="col-span-2 flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row justify-between lg:justify-normal gap-3">
+                        <div className="col-span-2 flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row justify-between lg:justify-normal gap-3">   
                             {/* Date and Time */}
                             <Dropdown label="Date">
                                 <div className="absolute bg-white shadow-md rounded-md w-max min-w-full mt-2 p-4 z-20">
